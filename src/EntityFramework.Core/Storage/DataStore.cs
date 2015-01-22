@@ -40,7 +40,7 @@ namespace Microsoft.Data.Entity.Storage
             [NotNull] EntityMaterializerSource entityMaterializerSource,
             [NotNull] ClrCollectionAccessorSource collectionAccessorSource,
             [NotNull] ClrPropertySetterSource propertySetterSource,
-            [NotNull] ILoggerFactory loggerFactory,
+            [NotNull] Func<ILoggerFactory> loggerFactory,
             [NotNull] ICompiledQueryCache compiledQueryCache)
         {
             Check.NotNull(stateManager, "stateManager");
@@ -62,7 +62,7 @@ namespace Microsoft.Data.Entity.Storage
             _propertySetterSource = propertySetterSource;
             CompiledQueryCache = compiledQueryCache;
 
-            _logger = new LazyRef<ILogger>(loggerFactory.Create<DataStore>);
+            _logger = new LazyRef<ILogger>(loggerFactory.Invoke().Create<DataStore>);
         }
 
         public virtual ILogger Logger => _logger.Value;

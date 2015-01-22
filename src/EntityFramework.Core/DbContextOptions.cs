@@ -53,6 +53,18 @@ namespace Microsoft.Data.Entity
             get { return _model; }
         }
 
+        public virtual bool LogAppData()
+        {
+            var extension = _extensions.FirstOrDefault(e => e is DbContextOptionsExtension); 
+            return extension?.LogAppData ?? false;
+        }
+
+        public virtual void LogAppData(bool logAppData)
+        {
+            var extension = _extensions.First(e => e is DbContextOptionsExtension);
+            extension.LogAppData = logAppData;
+        }
+
         void IDbContextOptions.AddOrUpdateExtension<TExtension>(Action<TExtension> updater)
         {
             Check.NotNull(updater, "updater");

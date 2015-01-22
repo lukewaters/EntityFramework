@@ -23,7 +23,7 @@ namespace Microsoft.Data.Entity.SqlServer.Update
         public SqlServerBatchExecutor(
             [NotNull] SqlServerTypeMapper typeMapper,
             [NotNull] DbContextService<DbContext> context,
-            [NotNull] ILoggerFactory loggerFactory)
+            [NotNull] Func<ILoggerFactory> loggerFactory)
             : base(typeMapper, context, loggerFactory)
         {
         }

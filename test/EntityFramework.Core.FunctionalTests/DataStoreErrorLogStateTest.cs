@@ -137,6 +137,9 @@ namespace Microsoft.Data.Entity.FunctionalTests
                     ex = ex.InnerException;
                 }
 
+                Assert.True(serviceProvider.GetRequiredService<Func<ILoggerFactory>>().Invoke() is DbLoggerFactory);
+                Assert.Same(loggerFactory, ((DbLoggerFactory)serviceProvider.GetRequiredService<Func<ILoggerFactory>>().Invoke()).LoggerFactory);
+
                 Assert.Equal("Jim said to throw from ctor!", ex.Message);
                 Assert.Same(ex, loggerFactory.Logger.LastDataStoreErrorException);
                 Assert.Same(typeof(BloggingContext), loggerFactory.Logger.LastDataStoreErrorState.ContextType);

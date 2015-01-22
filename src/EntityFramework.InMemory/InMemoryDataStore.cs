@@ -42,7 +42,7 @@ namespace Microsoft.Data.Entity.InMemory
             [NotNull] ClrPropertySetterSource propertySetterSource,
             [NotNull] InMemoryDatabase persistentDatabase,
             [NotNull] DbContextService<IDbContextOptions> options,
-            [NotNull] ILoggerFactory loggerFactory,
+            [NotNull] Func<ILoggerFactory> loggerFactory,
             [NotNull] ICompiledQueryCache compiledQueryCache)
             : base(
                 Check.NotNull(stateManager, "stateManager"),

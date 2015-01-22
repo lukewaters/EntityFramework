@@ -20,7 +20,7 @@ namespace Microsoft.Data.Entity.Relational.Tests
                 new DbContextService<IModel>(() => null),
                 Mock.Of<DataStoreCreator>(),
                 Mock.Of<DataStoreConnection>(),
-                new LoggerFactory());
+                () => new LoggerFactory());
 
             Assert.Same(database, database.AsRelational());
         }
@@ -32,7 +32,7 @@ namespace Microsoft.Data.Entity.Relational.Tests
                 new DbContextService<IModel>(() => null),
                 Mock.Of<DataStoreCreator>(),
                 Mock.Of<DataStoreConnection>(),
-                new LoggerFactory());
+                () => new LoggerFactory());
 
             Assert.Equal(
                 Strings.RelationalNotInUse,
@@ -45,7 +45,7 @@ namespace Microsoft.Data.Entity.Relational.Tests
                 DbContextService<IModel> model,
                 DataStoreCreator dataStoreCreator,
                 DataStoreConnection connection,
-                ILoggerFactory loggerFactory)
+                Func<ILoggerFactory> loggerFactory)
                 : base(model, dataStoreCreator, connection, loggerFactory)
             {
             }
@@ -57,7 +57,7 @@ namespace Microsoft.Data.Entity.Relational.Tests
                 DbContextService<IModel> model,
                 DataStoreCreator dataStoreCreator,
                 DataStoreConnection connection,
-                ILoggerFactory loggerFactory)
+                Func<ILoggerFactory> loggerFactory)
                 : base(model, dataStoreCreator, connection, loggerFactory)
             {
             }

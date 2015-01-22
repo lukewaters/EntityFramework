@@ -23,7 +23,7 @@ namespace Microsoft.Data.Entity.Relational.Tests.Migrations
                 Mock.Of<DataStoreCreator>(),
                 Mock.Of<DataStoreConnection>(),
                 Mock.Of<Migrator>(),
-                new LoggerFactory());
+                () => new LoggerFactory());
 
             Assert.Same(database, database.AsMigrationsEnabled());
         }
@@ -35,7 +35,7 @@ namespace Microsoft.Data.Entity.Relational.Tests.Migrations
                 new DbContextService<IModel>(() => null),
                 Mock.Of<DataStoreCreator>(),
                 Mock.Of<DataStoreConnection>(),
-                new LoggerFactory());
+                () => new LoggerFactory());
 
             Assert.Equal(
                 Strings.MigrationsNotInUse,
@@ -48,7 +48,7 @@ namespace Microsoft.Data.Entity.Relational.Tests.Migrations
                 DbContextService<IModel> model,
                 DataStoreCreator dataStoreCreator,
                 DataStoreConnection connection,
-                ILoggerFactory loggerFactory)
+                Func<ILoggerFactory> loggerFactory)
                 : base(model, dataStoreCreator, connection, loggerFactory)
             {
             }
@@ -61,7 +61,7 @@ namespace Microsoft.Data.Entity.Relational.Tests.Migrations
                 DataStoreCreator dataStoreCreator,
                 DataStoreConnection connection,
                 Migrator migrator,
-                ILoggerFactory loggerFactory)
+                Func<ILoggerFactory> loggerFactory)
                 : base(model, dataStoreCreator, connection, migrator, loggerFactory)
             {
             }

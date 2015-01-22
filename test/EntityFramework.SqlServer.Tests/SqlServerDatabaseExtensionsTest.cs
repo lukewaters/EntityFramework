@@ -18,7 +18,7 @@ namespace Microsoft.Data.Entity.SqlServer.Tests
                 Mock.Of<SqlServerDataStoreCreator>(),
                 Mock.Of<SqlServerConnection>(),
                 Mock.Of<SqlServerMigrator>(),
-                new LoggerFactory());
+                () => new LoggerFactory());
 
             Assert.Same(database, database.AsSqlServer());
         }
@@ -30,7 +30,7 @@ namespace Microsoft.Data.Entity.SqlServer.Tests
                 new DbContextService<IModel>(() => null),
                 Mock.Of<DataStoreCreator>(),
                 Mock.Of<DataStoreConnection>(),
-                new LoggerFactory());
+                () => new LoggerFactory());
 
             Assert.Equal(
                 Strings.SqlServerNotInUse,
@@ -43,7 +43,7 @@ namespace Microsoft.Data.Entity.SqlServer.Tests
                 DbContextService<IModel> model,
                 DataStoreCreator dataStoreCreator,
                 DataStoreConnection connection,
-                ILoggerFactory loggerFactory)
+                Func<ILoggerFactory> loggerFactory)
                 : base(model, dataStoreCreator, connection, loggerFactory)
             {
             }

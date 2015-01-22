@@ -83,6 +83,8 @@
     <Compile Include="ChangeTracking\StateEntryMetadataServices.cs" />
     <Compile Include="ChangeTracking\ValueGenerationManager.cs" />
     <Compile Include="DbContext.cs" />
+    <Compile Include="DbLogger.cs" />
+    <Compile Include="DbLoggerFactory.cs" />
     <Compile Include="Identity\TemporaryBinaryValueGenerator.cs" />
     <Compile Include="Identity\TemporaryStringValueGenerator.cs" />
     <Compile Include="IIncludableQueryable.cs" />

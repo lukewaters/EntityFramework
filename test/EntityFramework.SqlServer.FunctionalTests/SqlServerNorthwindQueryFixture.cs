@@ -32,6 +32,7 @@ namespace Microsoft.Data.Entity.SqlServer.FunctionalTests
 
             _options = new DbContextOptions();
             _options.UseSqlServer(_testStore.Connection.ConnectionString);
+            _options.LogAppData(false);
         }
 
         public override NorthwindContext CreateContext()

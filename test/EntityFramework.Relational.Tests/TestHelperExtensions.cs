@@ -242,7 +242,7 @@ namespace Microsoft.Data.Entity.Tests
         private List<Tuple<RelationalConnection, DbTransaction, string[]>> _nonQueries
             = new List<Tuple<RelationalConnection, DbTransaction, string[]>>();
 
-        public RecordingSqlStatementExecutor(ILoggerFactory loggerFactory)
+        public RecordingSqlStatementExecutor(Func<ILoggerFactory> loggerFactory)
             : base(loggerFactory)
         {
         }
@@ -469,7 +469,7 @@ namespace Microsoft.Data.Entity.Tests
             RecordingDataStoreCreator dataStoreCreator,
             FakeRelationalConnection connection,
             TestMigrator migrator,
-            ILoggerFactory loggerFactory)
+            Func<ILoggerFactory> loggerFactory)
             : base(model, dataStoreCreator, connection, migrator, loggerFactory)
         {
         }
@@ -495,7 +495,7 @@ namespace Microsoft.Data.Entity.Tests
             FakeCommandBatchPreparer batchPreparer,
             BatchExecutor batchExecutor,
             DbContextService<IDbContextOptions> options,
-            ILoggerFactory loggerFactory,
+            Func<ILoggerFactory> loggerFactory,
             ICompiledQueryCache compiledQueryCache)
             : base(stateManager, model, entityKeyFactorySource, entityMaterializerSource,
                 collectionAccessorSource, propertySetterSource, connection, batchPreparer, batchExecutor, options, loggerFactory,

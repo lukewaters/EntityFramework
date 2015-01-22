@@ -20,7 +20,7 @@ namespace Microsoft.Data.Entity.InMemory.Tests
                 new DbContextService<IModel>(() => null), 
                 Mock.Of<InMemoryDataStoreCreator>(), 
                 Mock.Of<InMemoryConnection>(), 
-                new LoggerFactory());
+                () => new LoggerFactory());
 
             Assert.Same(database, database.AsInMemory());
         }
@@ -32,7 +32,7 @@ namespace Microsoft.Data.Entity.InMemory.Tests
                 new DbContextService<IModel>(() => null),
                 Mock.Of<DataStoreCreator>(),
                 Mock.Of<DataStoreConnection>(),
-                new LoggerFactory());
+                () => new LoggerFactory());
 
             Assert.Equal(
                 Strings.InMemoryNotInUse,
@@ -45,7 +45,7 @@ namespace Microsoft.Data.Entity.InMemory.Tests
                 DbContextService<IModel> model,
                 DataStoreCreator dataStoreCreator,
                 DataStoreConnection connection,
-                ILoggerFactory loggerFactory)
+                Func<ILoggerFactory> loggerFactory)
                 : base(model, dataStoreCreator, connection, loggerFactory)
             {
             }

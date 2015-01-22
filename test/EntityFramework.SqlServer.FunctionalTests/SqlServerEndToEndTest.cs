@@ -104,7 +104,7 @@ namespace Microsoft.Data.Entity.SqlServer.FunctionalTests
                 SqlServerCommandBatchPreparer batchPreparer,
                 SqlServerBatchExecutor batchExecutor,
                 DbContextService<IDbContextOptions> options,
-                ILoggerFactory loggerFactory,
+                Func<ILoggerFactory> loggerFactory,
                 ICompiledQueryCache compiledQueryCache)
                 : base(stateManager, model, entityKeyFactorySource, entityMaterializerSource,
                     collectionAccessorSource, propertySetterSource, connection, batchPreparer,
@@ -542,6 +542,7 @@ namespace Microsoft.Data.Entity.SqlServer.FunctionalTests
             protected override void OnConfiguring(DbContextOptions options)
             {
                 options.UseSqlServer(SqlServerNorthwindContext.ConnectionString);
+                options.LogAppData(true);
             }
 
             protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -566,6 +567,11 @@ namespace Microsoft.Data.Entity.SqlServer.FunctionalTests
             public BloggingContext(IServiceProvider serviceProvider, DbContextOptions options)
                 : base(serviceProvider, options)
             {
+            }
+
+            protected override void OnConfiguring(DbContextOptions options)
+            {
+                options.LogAppData(true);
             }
         }
 

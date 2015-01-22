@@ -11,6 +11,23 @@ namespace Microsoft.Data.Entity.Infrastructure
 {
     public abstract class DbContextOptionsExtension
     {
+        private const string LogAppDataKey = "LogAppData";
+
+        private bool? _logAppData;
+
+        public virtual bool? LogAppData
+        {
+            get
+            {
+                return _logAppData;
+            }
+            [param: CanBeNull]
+            set
+            {
+                _logAppData = value;
+            }
+        }
+
         private static readonly Dictionary<Type, Func<string, string, object>> _conversionFuncs = new Dictionary<Type, Func<string, string, object>>
             {
                 {
@@ -36,6 +53,11 @@ namespace Microsoft.Data.Entity.Infrastructure
             Check.NotNull(rawOptions, "rawOptions");
 
             RawOptions = rawOptions;
+
+            if (!_logAppData.HasValue)
+            {
+                LogAppData = GetSetting<bool?>(LogAppDataKey);
+            }
         }
 
         protected T GetSetting<T>(string key)

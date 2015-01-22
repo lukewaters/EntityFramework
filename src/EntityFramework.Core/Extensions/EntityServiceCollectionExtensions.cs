@@ -86,6 +86,9 @@ namespace Microsoft.Framework.DependencyInjection
                 .AddScoped(DataStoreServices.ValueGeneratorCacheFactory)
                 .AddScoped(DataStoreServices.DataStoreCreatorFactory)
                 .AddSingleton<ILoggerFactory, LoggerFactory>()
+                .AddScoped((p) => new Func<ILoggerFactory>(() => 
+                    new DbLoggerFactory(p.GetRequiredServiceChecked<ILoggerFactory>(),
+                                        p.GetRequiredServiceChecked<DbContextService<IDbContextOptions>>())))
                 .AddTypeActivator()
                 .AddOptions());
 

@@ -47,7 +47,7 @@ namespace Microsoft.Data.Entity.Relational
             [NotNull] CommandBatchPreparer batchPreparer,
             [NotNull] BatchExecutor batchExecutor,
             [NotNull] DbContextService<IDbContextOptions> options,
-            [NotNull] ILoggerFactory loggerFactory,
+            [NotNull] Func<ILoggerFactory> loggerFactory,
             [NotNull] ICompiledQueryCache compiledQueryCache)
             : base(
                 Check.NotNull(stateManager, "stateManager"),

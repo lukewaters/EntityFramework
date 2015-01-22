@@ -17,11 +17,11 @@ namespace Microsoft.Data.Entity.Relational
     {
         private readonly LazyRef<ILogger> _logger;
 
-        public SqlStatementExecutor([NotNull] ILoggerFactory loggerFactory)
+        public SqlStatementExecutor([NotNull] Func<ILoggerFactory> loggerFactory)
         {
             Check.NotNull(loggerFactory, "loggerFactory");
 
-            _logger = new LazyRef<ILogger>(loggerFactory.Create<SqlStatementExecutor>);
+            _logger = new LazyRef<ILogger>(loggerFactory.Invoke().Create<SqlStatementExecutor>);
         }
 
         protected virtual ILogger Logger

@@ -264,7 +264,7 @@ namespace Microsoft.Data.Entity.SqlServer.Tests
             private long _current;
 
             public FakeSqlStatementExecutor(int blockSize)
-                : base(new LoggerFactory())
+                : base(() => new LoggerFactory())
             {
                 _blockSize = blockSize;
                 _current = -blockSize;

@@ -19,7 +19,7 @@ namespace Microsoft.Data.Entity.Relational
                    [NotNull] DbContextService<IModel> model,
                    [NotNull] DataStoreCreator dataStoreCreator,
                    [NotNull] DataStoreConnection connection,
-                   [NotNull] ILoggerFactory loggerFactory)
+                   [NotNull] Func<ILoggerFactory> loggerFactory)
             : base(model, dataStoreCreator, connection, loggerFactory)
         {
         }

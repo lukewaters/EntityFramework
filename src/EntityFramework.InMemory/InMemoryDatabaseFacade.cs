@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using JetBrains.Annotations;
+using System;
 using Microsoft.Data.Entity.Infrastructure;
 using Microsoft.Data.Entity.Metadata;
 using Microsoft.Framework.Logging;
@@ -14,7 +15,7 @@ namespace Microsoft.Data.Entity.InMemory
             [NotNull] DbContextService<IModel> model,
             [NotNull] InMemoryDataStoreCreator dataStoreCreator,
             [NotNull] InMemoryConnection connection,
-            [NotNull] ILoggerFactory loggerFactory)
+            [NotNull] Func<ILoggerFactory> loggerFactory)
             : base(model, dataStoreCreator, connection, loggerFactory)
         {
         }

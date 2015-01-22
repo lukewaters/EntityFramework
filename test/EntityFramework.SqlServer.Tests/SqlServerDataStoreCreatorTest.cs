@@ -152,7 +152,7 @@ namespace Microsoft.Data.Entity.SqlServer.Tests
 
         private class FakeSqlStatementExecutor : SqlStatementExecutor
         {
-            public FakeSqlStatementExecutor(ILoggerFactory loggerFactory)
+            public FakeSqlStatementExecutor(Func<ILoggerFactory> loggerFactory)
                 : base(loggerFactory)
             {
             }

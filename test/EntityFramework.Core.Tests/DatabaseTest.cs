@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Data.Entity.Infrastructure;
@@ -28,7 +29,7 @@ namespace Microsoft.Data.Entity.Tests
                     new DbContextService<IModel>(() => model),
                     creatorMock.Object,
                     connection,
-                    new LoggerFactory());
+                    () => new LoggerFactory());
 
             Assert.True(database.EnsureCreated());
             creatorMock.Verify(m => m.EnsureCreated(model), Times.Once);
@@ -53,7 +54,7 @@ namespace Microsoft.Data.Entity.Tests
                     new DbContextService<IModel>(() => model),
                     creatorMock.Object,
                     Mock.Of<DataStoreConnection>(),
-                    new LoggerFactory());
+                    () => new LoggerFactory());
 
             Assert.True(await database.EnsureCreatedAsync(cancellationToken));
             creatorMock.Verify(m => m.EnsureCreatedAsync(model, cancellationToken), Times.Once);
@@ -68,7 +69,7 @@ namespace Microsoft.Data.Entity.Tests
                 DbContextService<IModel> model,
                 DataStoreCreator dataStoreCreator,
                 DataStoreConnection connection,
-                ILoggerFactory loggerFactory)
+                Func<ILoggerFactory> loggerFactory)
                 : base(model, dataStoreCreator, connection, loggerFactory)
             {
             }

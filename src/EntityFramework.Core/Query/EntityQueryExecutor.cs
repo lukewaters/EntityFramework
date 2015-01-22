@@ -27,7 +27,7 @@ namespace Microsoft.Data.Entity.Query
         public EntityQueryExecutor(
             [NotNull] DbContextService<DbContext> context,
             [NotNull] DbContextService<DataStore> dataStore,
-            [NotNull] ILoggerFactory loggerFactory)
+            [NotNull] Func<ILoggerFactory> loggerFactory)
         {
             Check.NotNull(context, "context");
             Check.NotNull(dataStore, "dataStore");
@@ -35,7 +35,7 @@ namespace Microsoft.Data.Entity.Query
 
             _context = context;
             _dataStore = dataStore;
-            _logger = new LazyRef<ILogger>(loggerFactory.Create<EntityQueryExecutor>);
+            _logger = new LazyRef<ILogger>(loggerFactory.Invoke().Create<EntityQueryExecutor>);
         }
 
         public virtual T ExecuteScalar<T>([NotNull] QueryModel queryModel)

@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,7 +35,7 @@ namespace Microsoft.Data.Entity.Relational.Tests
                 new DbContextService<IModel>(model),
                 creatorMock.Object,
                 connectionMock.Object,
-                new LoggerFactory());
+                () => new LoggerFactory());
 
             Assert.True(database.Exists());
             creatorMock.Verify(m => m.Exists(), Times.Once);
@@ -81,7 +82,7 @@ namespace Microsoft.Data.Entity.Relational.Tests
                 new DbContextService<IModel>(model),
                 creatorMock.Object,
                 connectionMock.Object,
-                new LoggerFactory());
+                () => new LoggerFactory());
 
             Assert.True(await database.ExistsAsync(cancellationToken));
             creatorMock.Verify(m => m.ExistsAsync(cancellationToken), Times.Once);
@@ -111,7 +112,7 @@ namespace Microsoft.Data.Entity.Relational.Tests
                 DbContextService<IModel> model,
                 DataStoreCreator dataStoreCreator,
                 DataStoreConnection connection,
-                ILoggerFactory loggerFactory)
+                Func<ILoggerFactory> loggerFactory)
                 : base(model, dataStoreCreator, connection, loggerFactory)
             {
             }

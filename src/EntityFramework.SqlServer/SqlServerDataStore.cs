@@ -39,7 +39,7 @@ namespace Microsoft.Data.Entity.SqlServer
             [NotNull] SqlServerCommandBatchPreparer batchPreparer,
             [NotNull] SqlServerBatchExecutor batchExecutor,
             [NotNull] DbContextService<IDbContextOptions> options,
-            [NotNull] ILoggerFactory loggerFactory,
+            [NotNull] Func<ILoggerFactory> loggerFactory,
             [NotNull] ICompiledQueryCache compiledQueryCache)
             : base(
                 Check.NotNull(stateManager, "stateManager"),

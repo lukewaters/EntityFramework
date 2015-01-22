@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -22,11 +23,11 @@ namespace Microsoft.Data.Entity.InMemory
             = new ThreadSafeLazyRef<ImmutableDictionary<IEntityType, InMemoryTable>>(
                 () => ImmutableDictionary<IEntityType, InMemoryTable>.Empty.WithComparers(new EntityTypeNameEqualityComparer()));
 
-        public InMemoryDatabase([NotNull] ILoggerFactory loggerFactory)
+        public InMemoryDatabase([NotNull] Func<ILoggerFactory> loggerFactory)
         {
             Check.NotNull(loggerFactory, "loggerFactory");
 
-            _logger = loggerFactory.Create<InMemoryDatabase>();
+            _logger = loggerFactory.Invoke().Create<InMemoryDatabase>();
         }
 
         /// <summary>

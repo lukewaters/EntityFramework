@@ -17,7 +17,14 @@ namespace Microsoft.Framework.Logging
             Check.NotNull(logger, "logger");
             Check.NotEmpty(sql, "sql");
 
-            logger.WriteVerbose(RelationalLoggingEventIds.Sql, sql);
+            if (logger.SensitiveLoggingEnabled())
+            {
+                logger.WriteVerbose(RelationalLoggingEventIds.Sql, sql);
+            }
+            else
+            {
+                logger.WriteVerbose(RelationalLoggingEventIds.Sql, sql + "without parameters!");
+            }
         }
 
         public static void CreatingDatabase([NotNull] this ILogger logger, [NotNull] string databaseName)
@@ -25,10 +32,21 @@ namespace Microsoft.Framework.Logging
             Check.NotNull(logger, "logger");
             Check.NotEmpty(databaseName, "databaseName");
 
-            logger.WriteInformation(
-                RelationalLoggingEventIds.CreatingDatabase,
-                databaseName,
-                Strings.RelationalLoggerCreatingDatabase);
+            if (logger.SensitiveLoggingEnabled())
+            {
+                logger.WriteInformation(
+                   RelationalLoggingEventIds.CreatingDatabase,
+                   databaseName,
+                   Strings.RelationalLoggerCreatingDatabase);
+                
+            }
+            else
+            {
+                logger.WriteInformation(
+                   RelationalLoggingEventIds.CreatingDatabase,
+                   databaseName,
+                   Strings.RelationalLoggerCreatingDatabase);
+            }
         }
 
         public static void OpeningConnection([NotNull] this ILogger logger, [NotNull] string connectionString)
@@ -36,10 +54,22 @@ namespace Microsoft.Framework.Logging
             Check.NotNull(logger, "logger");
             Check.NotEmpty(connectionString, "connectionString");
 
-            logger.WriteVerbose(
-                RelationalLoggingEventIds.OpeningConnection,
-                connectionString,
-                Strings.RelationalLoggerOpeningConnection);
+
+
+            if (logger.SensitiveLoggingEnabled())
+            {
+                logger.WriteVerbose(
+                    RelationalLoggingEventIds.OpeningConnection,
+                    connectionString,
+                    Strings.RelationalLoggerOpeningConnection);
+            }
+            else
+            {
+                logger.WriteVerbose(
+                   RelationalLoggingEventIds.OpeningConnection,
+                   connectionString,
+                   Strings.RelationalLoggerOpeningConnection);
+            }
         }
 
         public static void ClosingConnection([NotNull] this ILogger logger, [NotNull] string connectionString)
@@ -47,10 +77,20 @@ namespace Microsoft.Framework.Logging
             Check.NotNull(logger, "logger");
             Check.NotEmpty(connectionString, "connectionString");
 
-            logger.WriteVerbose(
-                RelationalLoggingEventIds.ClosingConnection,
-                connectionString,
-                Strings.RelationalLoggerClosingConnection);
+            if (logger.SensitiveLoggingEnabled())
+            {
+                logger.WriteVerbose(
+                    RelationalLoggingEventIds.ClosingConnection,
+                    connectionString,
+                    Strings.RelationalLoggerClosingConnection);
+            }
+            else
+            {
+                logger.WriteVerbose(
+                    RelationalLoggingEventIds.ClosingConnection,
+                    connectionString,
+                    Strings.RelationalLoggerClosingConnection);
+            }
         }
 
         public static void BeginningTransaction([NotNull] this ILogger logger, IsolationLevel isolationLevel)

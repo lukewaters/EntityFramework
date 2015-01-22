@@ -30,7 +30,7 @@ namespace Microsoft.Data.Entity.Relational.Update
         public BatchExecutor(
             [NotNull] RelationalTypeMapper typeMapper,
             [NotNull] DbContextService<DbContext> context,
-            [NotNull] ILoggerFactory loggerFactory)
+            [NotNull] Func<ILoggerFactory> loggerFactory)
         {
             Check.NotNull(typeMapper, "typeMapper");
             Check.NotNull(context, "context");
@@ -38,7 +38,7 @@ namespace Microsoft.Data.Entity.Relational.Update
 
             _typeMapper = typeMapper;
             _context = context;
-            _logger = new LazyRef<ILogger>(() => (loggerFactory.Create<BatchExecutor>()));
+            _logger = new LazyRef<ILogger>(() => (loggerFactory.Invoke().Create<BatchExecutor>()));
         }
 
         protected virtual ILogger Logger

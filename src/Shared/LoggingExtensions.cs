@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using Microsoft.Data.Entity;
+using Microsoft.Data.Entity.Utilities;
 using System;
 
 // ReSharper disable once CheckNamespace
@@ -72,6 +74,29 @@ namespace Microsoft.Framework.Logging
             {
                 logger.Write(LogLevel.Verbose, eventId, state, null, (s, _) => formatter((TState)s));
             }
+        }
+
+        public static ILogger AppData(this ILogger logger)
+        {
+            var dbLogger = logger as DbLogger;
+            Check.NotNull(dbLogger, "logger");
+
+            if (dbLogger.LogAppDataDbLogger)
+            {
+                return logger;
+            }
+            else
+            {
+                return NullLogger.Instance;
+            }
+        }
+
+        public static bool SensitiveLoggingEnabled(this ILogger logger)
+        {
+            var dbLogger = logger as DbLogger;
+            Check.NotNull(dbLogger, "logger");
+
+            return dbLogger.LogAppDataDbLogger;
         }
     }
 }

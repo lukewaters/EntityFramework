@@ -32,7 +32,7 @@ namespace Microsoft.Data.Entity.Infrastructure
             [NotNull] DbContextService<IModel> model,
             [NotNull] DataStoreCreator dataStoreCreator,
             [NotNull] DataStoreConnection connection,
-            [NotNull] ILoggerFactory loggerFactory)
+            [NotNull] Func<ILoggerFactory> loggerFactory)
         {
             Check.NotNull(model, "model");
             Check.NotNull(dataStoreCreator, "dataStoreCreator");
@@ -42,7 +42,7 @@ namespace Microsoft.Data.Entity.Infrastructure
             _model = model;
             _dataStoreCreator = dataStoreCreator;
             _connection = connection;
-            _logger = new LazyRef<ILogger>(loggerFactory.Create<Database>);
+            _logger = new LazyRef<ILogger>(loggerFactory.Invoke().Create<Database>);
         }
 
         public virtual DataStoreConnection Connection

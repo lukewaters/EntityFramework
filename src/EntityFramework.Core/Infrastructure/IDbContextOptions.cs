@@ -17,6 +17,8 @@ namespace Microsoft.Data.Entity.Infrastructure
         [CanBeNull]
         IModel Model { get; }
 
+        bool LogAppData();
+
         void AddOrUpdateExtension<TExtension>([NotNull] Action<TExtension> updater)
             where TExtension : DbContextOptionsExtension, new();
 
