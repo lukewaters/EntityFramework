@@ -65,7 +65,7 @@ namespace Microsoft.Data.Entity.Relational.Query
 
                     using (var command = _enumerable._commandBuilder.Build(_enumerable._relationalQueryContext.Connection))
                     {
-                        _enumerable._logger.WriteSql(command.CommandText);
+                        _enumerable._logger.WriteSql(command);
 
                         _reader = command.ExecuteReader();
                     }
