@@ -178,7 +178,7 @@ namespace Microsoft.Data.Entity.Commands
                         var migrationFile = FindProjectFile(projectDir, migrationFileName);
                         if (migrationFile != null)
                         {
-                            filesToDelete.Add(migrationFile);
+                            filesToDelete.Add(migrationFile);//safe
                             _logger.Value.WriteInformation(Strings.RemovingMigration(migration.GetMigrationName()));
                         }
                         else
@@ -214,12 +214,12 @@ namespace Microsoft.Data.Entity.Commands
                 {
                     if (snapshotFile != null)
                     {
-                        filesToDelete.Add(snapshotFile);
+                        filesToDelete.Add(snapshotFile);//safe
                         _logger.Value.WriteInformation(Strings.RemovingSnapshot);
                     }
                     else
                     {
-                        var snapshotClass = snapshot.GetType().FullName;
+                        var snapshotClass = snapshot.GetType().FullName;//safe
                         _logger.Value.WriteWarning(Strings.NoSnapshotFile(snapshotFileName, snapshotClass));
                     }
                 }
@@ -241,7 +241,7 @@ namespace Microsoft.Data.Entity.Commands
                         contextType,
                         snapshotModelCode);
                     File.WriteAllText(snapshotFile, snapshotModelCode.ToString());
-                    _logger.Value.WriteInformation(Strings.RevertingSnapshot);
+                    _logger.Value.WriteInformation(Strings.RevertingSnapshot);//safe
                 }
             }
 
@@ -251,7 +251,7 @@ namespace Microsoft.Data.Entity.Commands
         public virtual Type GetContextType([CanBeNull] string name)
         {
             var contextType = ContextTool.SelectType(GetContextTypes(), name);
-            _logger.Value.WriteVerbose(Strings.LogUseContext(contextType.Name));
+            _logger.Value.WriteVerbose(Strings.LogUseContext(contextType.Name));//safe
 
             return contextType;
         }

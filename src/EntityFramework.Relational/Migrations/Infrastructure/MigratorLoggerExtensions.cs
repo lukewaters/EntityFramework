@@ -13,7 +13,7 @@ namespace Microsoft.Data.Entity.Relational.Migrations.Infrastructure
         {
             Check.NotNull(logger, "logger");
 
-            logger.WriteInformation(
+            logger.WriteInformation( //safe
                 MigratorLoggerEventIds.CreatingHistoryTable,
                 () => Strings.MigratorLoggerCreatingHistoryTable);
         }
@@ -22,7 +22,7 @@ namespace Microsoft.Data.Entity.Relational.Migrations.Infrastructure
         {
             Check.NotNull(logger, "logger");
 
-            logger.WriteInformation(
+            logger.WriteInformation( //safe
                 MigratorLoggerEventIds.DroppingHistoryTable,
                 () => Strings.MigratorLoggerDroppingHistoryTable);
         }
@@ -32,7 +32,7 @@ namespace Microsoft.Data.Entity.Relational.Migrations.Infrastructure
             Check.NotNull(logger, "logger");
             Check.NotEmpty(migrationId, "migrationId");
 
-            logger.WriteInformation(
+            logger.WriteInformation(//safe
                 MigratorLoggerEventIds.ApplyingMigration, migrationId,
                 Strings.MigratorLoggerApplyingMigration);
         }
@@ -42,7 +42,7 @@ namespace Microsoft.Data.Entity.Relational.Migrations.Infrastructure
             Check.NotNull(logger, "logger");
             Check.NotEmpty(migrationId, "migrationId");
 
-            logger.WriteInformation(
+            logger.WriteInformation( //safe
                 MigratorLoggerEventIds.RevertingMigration, migrationId,
                 Strings.MigratorLoggerRevertingMigration);
         }
@@ -51,7 +51,7 @@ namespace Microsoft.Data.Entity.Relational.Migrations.Infrastructure
         {
             Check.NotNull(logger, "logger");
 
-            logger.WriteInformation(
+            logger.WriteInformation( //safe
                 MigratorLoggerEventIds.UpToDate,
                 () => Strings.MigratorLoggerUpToDate);
         }

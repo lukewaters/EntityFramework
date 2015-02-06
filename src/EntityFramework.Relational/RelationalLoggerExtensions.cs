@@ -31,21 +31,19 @@ namespace Microsoft.Framework.Logging
             Check.NotNull(logger, "logger");
             Check.NotEmpty(sql, "sql");
 
-            if (logger.SensitiveLoggingEnabled())
-            {
-                logger.WriteVerbose(RelationalLoggingEventIds.Sql, sql);
-            }
-            else
-            {
-                logger.WriteVerbose(RelationalLoggingEventIds.Sql, StripParameters(sql));
-            }
+            logger.WriteVerbose(RelationalLoggingEventIds.Sql, sql);
         }
 
-        private static string StripParameters(string sql)
+        public static void WriteCommand([NotNull] this ILogger logger, [NotNull] DbCommand command)
         {
-
-
-            return sql;
+            if (logger.SensitiveLoggingEnabled())
+            {
+                foreach (var parameter in command.Parameters)
+                {
+                    logger.WriteVerbose(RelationalLoggingEventIds.Sql, parameter);
+                }
+            }
+            logger.WriteSql(command.CommandText);
         }
 
         public static void CreatingDatabase([NotNull] this ILogger logger, [NotNull] string databaseName)
@@ -53,7 +51,7 @@ namespace Microsoft.Framework.Logging
             Check.NotNull(logger, "logger");
             Check.NotEmpty(databaseName, "databaseName");
 
-            logger.WriteInformation(
+            logger.WriteInformation( //safe
                 RelationalLoggingEventIds.CreatingDatabase,
                 databaseName,
                 Strings.RelationalLoggerCreatingDatabase);
@@ -66,14 +64,14 @@ namespace Microsoft.Framework.Logging
 
             if (logger.SensitiveLoggingEnabled())
             {
-                logger.WriteVerbose(
+                logger.WriteVerbose(// TODO verifiy message
                     RelationalLoggingEventIds.OpeningConnection,
                     StripConnectionString(connectionString),
                     Strings.RelationalLoggerOpeningConnection);
             }
             else
             {
-                logger.WriteVerbose(
+                logger.WriteVerbose(// TODO verifiy message
                    RelationalLoggingEventIds.OpeningConnection,
                    connectionString,
                    Strings.RelationalLoggerOpeningConnection);

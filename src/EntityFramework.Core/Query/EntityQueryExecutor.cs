@@ -72,7 +72,7 @@ namespace Microsoft.Data.Entity.Query
         public virtual IEnumerable<T> ExecuteCollection<T>([NotNull] QueryModel queryModel)
         {
             Check.NotNull(queryModel, "queryModel");
-
+            // TODO verifiy message
             _logger.Value.WriteInformation(queryModel, Strings.LogCompilingQueryModel);
 
             try
@@ -98,7 +98,7 @@ namespace Microsoft.Data.Entity.Query
             [NotNull] QueryModel queryModel, CancellationToken cancellationToken)
         {
             Check.NotNull(queryModel, "queryModel");
-
+            // TODO verifiy message
             _logger.Value.WriteInformation(queryModel, Strings.LogCompilingQueryModel);
 
             try

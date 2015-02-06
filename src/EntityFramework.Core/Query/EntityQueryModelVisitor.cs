@@ -142,7 +142,7 @@ namespace Microsoft.Data.Entity.Query
             Check.NotNull(queryModel, "queryModel");
 
             new QueryOptimizer(_queryAnnotations).VisitQueryModel(queryModel);
-
+            // TODO verifiy message
             QueryCompilationContext.Logger
                 .WriteInformation(queryModel, Strings.LogOptimizedQueryModel);
         }
@@ -235,7 +235,7 @@ namespace Microsoft.Data.Entity.Query
                                     Expression.Parameter(queryModel.SelectClause.Selector.Type));
 
                         QueryCompilationContext.Logger
-                            .WriteInformation(
+                            .WriteInformation(// TODO verifiy message
                                 include.navigationPath.Join("."),
                                 Strings.LogIncludingNavigation);
 
@@ -314,7 +314,7 @@ namespace Microsoft.Data.Entity.Query
             if (querySourceReferenceExpressionsToTrack.Any())
             {
                 QueryCompilationContext.Logger
-                    .WriteInformation(
+                    .WriteInformation(// TODO verifiy message
                         querySourceReferenceExpressionsToTrack,
                         qsres => Strings.LogTrackingQuerySources(
                             qsres.Select(qsre => qsre.ReferencedQuerySource.ItemName).Join()));
@@ -371,7 +371,7 @@ namespace Microsoft.Data.Entity.Query
 
             // TODO: Format expression in log (query plan)
             QueryCompilationContext.Logger
-                .WriteInformation(_expression, _ => Strings.LogCompiledQueryFunction);
+                .WriteInformation(_expression, _ => Strings.LogCompiledQueryFunction);// TODO verifiy message
 
             return qc => queryExecutor(qc, null);
         }

@@ -12,17 +12,17 @@ namespace Microsoft.Framework.Logging
     internal static class LoggingExtensions
     {
         public static void WriteInformation(this ILogger logger, Func<string> formatter)
-        {
+        { // not known
             logger.WriteInformation(0, default(object), _ => formatter());
         }
 
         public static void WriteInformation<TState>(this ILogger logger, TState state, Func<TState, string> formatter)
-        {
+        { // not known
             logger.WriteInformation(0, state, formatter);
         }
 
         public static void WriteInformation(this ILogger logger, int eventId, Func<string> formatter)
-        {
+        { // not known
             logger.WriteInformation(eventId, default(object), _ => formatter());
         }
 
@@ -30,7 +30,7 @@ namespace Microsoft.Framework.Logging
             this ILogger logger, int eventId, TState state, Func<TState, string> formatter)
         {
             if (logger.IsEnabled(LogLevel.Information))
-            {
+            { // not known
                 logger.Write(LogLevel.Information, eventId, state, null, (s, _) => formatter((TState)s));
             }
         }
@@ -39,7 +39,7 @@ namespace Microsoft.Framework.Logging
             this ILogger logger, Exception exception, Func<TState, Exception, string> formatter)
         {
             if (logger.IsEnabled(LogLevel.Error))
-            {
+            { // not known
                 logger.Write(LogLevel.Error, 0, null, exception, (s, e) => formatter((TState)s, e));
             }
         }
@@ -48,7 +48,7 @@ namespace Microsoft.Framework.Logging
             this ILogger logger, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
             if (logger.IsEnabled(LogLevel.Error))
-            {
+            { // not known
                 logger.Write(LogLevel.Error, 0, state, exception, (s, e) => formatter((TState)s, e));
             }
         }
@@ -62,7 +62,7 @@ namespace Microsoft.Framework.Logging
             this ILogger logger, TState state, Func<TState, string> formatter)
         {
             if (logger.IsEnabled(LogLevel.Verbose))
-            {
+            { // not known
                 logger.Write(LogLevel.Verbose, 0, state, null, (s, _) => formatter((TState)s));
             }
         }
@@ -71,7 +71,7 @@ namespace Microsoft.Framework.Logging
             this ILogger logger, int eventId, TState state, Func<TState, string> formatter)
         {
             if (logger.IsEnabled(LogLevel.Verbose))
-            {
+            { // not known
                 logger.Write(LogLevel.Verbose, eventId, state, null, (s, _) => formatter((TState)s));
             }
         }
