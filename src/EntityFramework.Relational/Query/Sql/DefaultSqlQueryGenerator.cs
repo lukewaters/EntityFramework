@@ -435,15 +435,43 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
         {
             Check.NotNull(caseExpression, nameof(caseExpression));
 
-            _sql.AppendLine("CASE WHEN (");
+            var nodeType = caseExpression.When.NodeType;
 
-            using (_sql.Indent())
+            if (nodeType == ExpressionType.Conditional)
             {
-                VisitExpression(caseExpression.When);
+                var conditionalExpression = (ConditionalExpression)caseExpression.When;
+                _sql.AppendLine("CASE WHEN (");
+                using (_sql.Indent())
+                {
+                    VisitExpression(conditionalExpression.Test);
+                }
+                _sql.AppendLine();
+                _sql.AppendLine(")");
+                _sql.AppendLine("THEN");
+                using (_sql.Indent())
+                {
+                    VisitExpression(conditionalExpression.IfTrue);
+                }
+                _sql.AppendLine();
+                _sql.AppendLine("ELSE");
+                using (_sql.Indent())
+                {
+                    VisitExpression(conditionalExpression.IfFalse);
+                }
+                _sql.AppendLine();
+                _sql.AppendLine("END");
             }
+            else
+            {
+                _sql.AppendLine("CASE WHEN (");
 
-            _sql.Append(") THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END");
+                using (_sql.Indent())
+                {
+                    VisitExpression(caseExpression.When);
+                }
 
+                _sql.Append(") THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END");
+            }
             return caseExpression;
         }
 
@@ -475,6 +503,17 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
 
                 return maybeNullComparisonExpression;
             }
+            else if (binaryExpression.NodeType == ExpressionType.Coalesce)
+            {
+                _sql.Append("COALESCE(");
+                VisitExpression(binaryExpression.Left);
+                _sql.Append(", ");
+                VisitExpression(binaryExpression.Right);
+                _sql.Append(")");
+            }
+            else
+            {
+                var needClosingParen = false;
 
             var needClosingParen = false;
 

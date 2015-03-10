@@ -282,7 +282,7 @@ namespace Microsoft.Data.Entity.Query
             if (chainedNavigationProperties != null)
             {
                 foreach (
-                    var navigation in 
+                    var navigation in
                         from propertyInfo in chainedNavigationProperties
                         let entityType
                             = QueryCompilationContext.Model
@@ -370,14 +370,14 @@ namespace Microsoft.Data.Entity.Query
         {
             return
                 (from qsre in querySourceReferenceExpressions
-                    select
-                        (Func<TResult, object>)
-                            AccessorFindingExpressionTreeVisitor
-                                .FindAccessorLambda(
-                                    qsre,
-                                    selector,
-                                    Expression.Parameter(typeof(TResult)))
-                                .Compile()
+                 select
+                     (Func<TResult, object>)
+                         AccessorFindingExpressionTreeVisitor
+                             .FindAccessorLambda(
+                                 qsre,
+                                 selector,
+                                 Expression.Parameter(typeof(TResult)))
+                             .Compile()
                     )
                     .ToList();
         }

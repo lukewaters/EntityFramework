@@ -2187,6 +2187,47 @@ WHERE ([o].[CustomerID] = 'QUICK') AND ([o].[OrderDate] > @__p_0)",
                 Sql);
         }
 
+        public override void Coalesce_orderby()
+        {
+            base.Coalesce_orderby();
+
+            Assert.Equal(
+                @"SELECT [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[CustomerID], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
+FROM [Customers] AS [c]
+ORDER BY COALESCE([c].[Region], 'ZZ')",
+                Sql);
+        }
+
+        public override void Coalesce_select()
+        {
+            base.Coalesce_select();
+
+            Assert.Equal(
+                @"SELECT [c].[CustomerID], [c].[CompanyName], [c].[Region]
+FROM [Customers] AS [c]
+ORDER BY COALESCE([c].[Region], 'ZZ')",
+                Sql);
+        }
+
+        public override void Ternary_orderby()
+        {
+            base.Ternary_orderby();
+
+            Assert.Equal(
+                @"SELECT [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[CustomerID], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
+FROM [Customers] AS [c]
+ORDER BY CASE WHEN (
+    [c].[Region] IS NULL
+)
+THEN
+    'ZZ'
+ELSE
+    [c].[Region]
+END
+",
+                Sql);
+        }
+
         public override void Contains_with_local_array_closure()
         {
             base.Contains_with_local_array_closure();

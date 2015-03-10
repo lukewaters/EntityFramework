@@ -30,6 +30,13 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
 
             switch (binaryExpression.NodeType)
             {
+                case ExpressionType.Coalesce:
+                {
+                    var left = VisitExpression(binaryExpression.Left);
+                    var right = VisitExpression(binaryExpression.Right);
+
+                    return binaryExpression.Update(left, binaryExpression.Conversion, right);
+                }
                 case ExpressionType.Equal:
                 case ExpressionType.NotEqual:
                 {
@@ -76,6 +83,15 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
             }
 
             return null;
+        }
+
+        protected override Expression VisitConditionalExpression(ConditionalExpression expression)
+        {
+            var test = VisitExpression(expression.Test);
+            var ifTrue = VisitExpression(expression.IfTrue);
+            var ifFalse = VisitExpression(expression.IfFalse);
+
+            return new CaseExpression(expression.Update(test, ifTrue, ifFalse));
         }
 
         private static Expression UnfoldStructuralComparison(ExpressionType expressionType, Expression expression)
