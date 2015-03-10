@@ -2814,6 +2814,31 @@ namespace Microsoft.Data.Entity.FunctionalTests
                 .Where(o => o.OrderDate > new DateTime(1998, 1, 1)), entryCount: 8);
         }
 
+
+        [Fact]
+        public virtual void Coalesce_orderby()
+        {
+            AssertQuery<Customer>(customer => customer
+                .OrderBy(c => c.Region ?? "ZZ"),
+                entryCount: 91);
+        }
+
+        [Fact]
+        public virtual void Coalesce_select()
+        {
+            AssertQuery<Customer>(customer => customer
+                .Select(c => new { c.CustomerID, c.CompanyName, Region = c.Region ?? "ZZ"}).OrderBy(o => o.Region),
+                entryCount: 0); // no entities to track, just dynamic types
+        }
+
+        [Fact]
+        public virtual void Ternary_orderby()
+        {
+            AssertQuery<Customer>(customer => customer
+                .OrderBy(c => c.Region == null ? "ZZ" : c.Region),
+                entryCount: 91);
+        }
+
         protected NorthwindContext CreateContext()
         {
             return Fixture.CreateContext();
