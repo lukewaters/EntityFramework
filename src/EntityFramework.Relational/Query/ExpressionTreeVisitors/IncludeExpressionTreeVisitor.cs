@@ -204,13 +204,7 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                     innerJoinSelectExpression.IsDistinct = true;
                     innerJoinSelectExpression.ClearProjection();
 
-                    foreach (var columnExpression
-                        in innerJoinSelectExpression.OrderBy
-                            .Select(o => o.Expression)
-                            .Cast<ColumnExpression>())
-                    {
-                        innerJoinSelectExpression.AddToProjection(columnExpression);
-                    }
+                    innerJoinSelectExpression.AddToProjection(innerJoinSelectExpression.OrderBy.Select(o => o.Expression));
 
                     innerJoinSelectExpression.ClearOrderBy();
 
@@ -219,17 +213,7 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                     var innerJoinExpression
                         = targetSelectExpression.AddInnerJoin(innerJoinSelectExpression);
 
-                    foreach (var ordering in selectExpression.OrderBy)
-                    {
-                        var columnExpression = (ColumnExpression)ordering.Expression;
-
-                        targetSelectExpression
-                            .AddToOrderBy(
-                                columnExpression.Alias ?? columnExpression.Name,
-                                columnExpression.Property,
-                                innerJoinExpression,
-                                ordering.OrderingDirection);
-                    }
+                    UpdateOrderby(selectExpression, targetSelectExpression, innerJoinExpression);
 
                     innerJoinExpression.Predicate
                         = BuildJoinEqualityExpression(
@@ -263,6 +247,62 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                                 materializer));
                 }
             }
+        }
+
+        private static void UpdateOrderby(SelectExpression selectExpression, SelectExpression targetSelectExpression, JoinExpressionBase innerJoinExpression)
+        {
+            foreach (var ordering in selectExpression.OrderBy)
+            {
+                var columnExpression = ordering.Expression as ColumnExpression;
+                if (columnExpression != null)
+                {
+                    targetSelectExpression
+                        .AddToOrderBy(
+                            columnExpression.Alias ?? columnExpression.Name,
+                            columnExpression.Property,
+                            innerJoinExpression,
+                            ordering.OrderingDirection);
+                }
+                else
+                {
+                    targetSelectExpression.AddToOrderBy(UpdateColumnExpression(ordering, innerJoinExpression));
+                }
+            }
+        }
+
+        private static Ordering UpdateColumnExpression(Ordering ordering, TableExpressionBase tableExpression)
+        {
+            var newExpression = UpdateColumnExpression(ordering.Expression, tableExpression);
+            var newOrdering = new Ordering(newExpression, ordering.OrderingDirection);
+
+            return newOrdering;
+        }
+
+        private static Expression UpdateColumnExpression(Expression expression, TableExpressionBase tableExpression)
+        {
+            var columnExpression = expression as ColumnExpression;
+
+            if (columnExpression != null)
+            {
+                return new ColumnExpression(columnExpression.Alias ?? columnExpression.Name, columnExpression.Property, tableExpression);
+            }
+            switch (expression.NodeType)
+            {
+                case ExpressionType.Coalesce:
+                    var binaryExpression = expression as BinaryExpression;
+                    var left = UpdateColumnExpression(binaryExpression.Left, tableExpression);
+                    var right = UpdateColumnExpression(binaryExpression.Right, tableExpression);
+                    binaryExpression.Update(left, binaryExpression.Conversion, right);
+                    break;
+                case ExpressionType.Conditional:
+                    var conditionalExpression = expression as ConditionalExpression;
+                    var test = UpdateColumnExpression(conditionalExpression.Test, tableExpression);
+                    var ifTrue = UpdateColumnExpression(conditionalExpression.IfTrue, tableExpression);
+                    var ifFalse = UpdateColumnExpression(conditionalExpression.IfFalse, tableExpression);
+                    conditionalExpression.Update(test, ifTrue, ifFalse);
+                    break;
+            }
+            return expression;
         }
 
         private static readonly MethodInfo _createValueReaderForIncludeMethodInfo

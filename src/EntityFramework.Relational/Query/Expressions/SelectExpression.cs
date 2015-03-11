@@ -295,6 +295,38 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
             return projectionIndex;
         }
 
+        public virtual void AddToProjection([NotNull] IEnumerable<Expression> expressions)
+        {
+            foreach (var expression in expressions)
+            {
+                var columnExpression = expression as ColumnExpression;
+                if (columnExpression != null)
+                {
+                    AddToProjection(columnExpression);
+                }
+                else
+                {
+                    switch (expression.NodeType)
+                    {
+                        case ExpressionType.Coalesce:
+                            var binaryExpression = expression as BinaryExpression;
+                            AddToProjection(new[] { binaryExpression.Left, binaryExpression.Right });
+                            break;
+                        case ExpressionType.Conditional:
+                            var conditionalExpression = expression as ConditionalExpression;
+                            AddToProjection(new[]
+                                {
+                                    conditionalExpression.Test,
+                                    conditionalExpression.IfFalse,
+                                    conditionalExpression.IfTrue
+                                });
+                            break;
+                    }
+                }
+            }
+        }
+
+
         public virtual void SetProjectionCaseExpression([NotNull] CaseExpression caseExpression)
         {
             Check.NotNull(caseExpression, nameof(caseExpression));
@@ -378,6 +410,13 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
             Check.NotNull(orderings, nameof(orderings));
 
             _orderBy.AddRange(orderings);
+        }
+
+        public virtual void AddToOrderBy([NotNull] Ordering ordering)
+        {
+            Check.NotNull(ordering, nameof(ordering));
+
+            _orderBy.Add(ordering);
         }
 
         public virtual void PrependToOrderBy([NotNull] IEnumerable<Ordering> orderings)

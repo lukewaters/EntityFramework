@@ -2371,6 +2371,50 @@ WHERE 1 = 1",
                 Sql);
         }
 
+        public override void Coalesce_projection()
+        {
+            base.Coalesce_projection();
+
+            Assert.Equal(
+                @"SELECT [c].[CustomerID], [c].[CompanyName], COALESCE([c].[Region], 'ZZ')
+FROM [Customers] AS [c]",
+                Sql);
+        }
+
+        public override void Coalesce_filter()
+        {
+            base.Coalesce_filter();
+
+            Assert.Equal(
+                @"SELECT [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[CustomerID], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
+FROM [Customers] AS [c]
+WHERE COALESCE([c].[CompanyName], [c].[ContactName]) = 'The Big Cheese'",
+                Sql);
+        }
+
+        public override void Coalesce_nested_query_include()
+        {
+            base.Coalesce_nested_query_include();
+
+            Assert.Equal(
+                @"SELECT [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[CustomerID], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
+FROM [Customers] AS [c1]
+CROSS JOIN [Customers] AS [c]
+WHERE [c].[CustomerID] = 'ALFKI'
+ORDER BY COALESCE([c].[Region], 'ZZ'), [c].[CustomerID]
+
+SELECT [o].[CustomerID], [o].[OrderDate], [o].[OrderID]
+FROM [Orders] AS [o]
+INNER JOIN (
+    SELECT DISTINCT [c].[Region], [c].[CustomerID]
+    FROM [Customers] AS [c1]
+    CROSS JOIN [Customers] AS [c]
+    WHERE [c].[CustomerID] = 'ALFKI'
+) AS [c] ON [o].[CustomerID] = [c].[CustomerID]
+ORDER BY COALESCE([c].[Region], 'ZZ'), [c].[CustomerID]",
+                Sql);
+        }
+
         public QuerySqlServerTest(NorthwindQuerySqlServerFixture fixture)
             : base(fixture)
         {
