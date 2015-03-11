@@ -440,26 +440,13 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
             if (nodeType == ExpressionType.Conditional)
             {
                 var conditionalExpression = (ConditionalExpression)caseExpression.When;
-                _sql.AppendLine("CASE WHEN (");
-                using (_sql.Indent())
-                {
-                    VisitExpression(conditionalExpression.Test);
-                }
-                _sql.AppendLine();
-                _sql.AppendLine(")");
-                _sql.AppendLine("THEN");
-                using (_sql.Indent())
-                {
-                    VisitExpression(conditionalExpression.IfTrue);
-                }
-                _sql.AppendLine();
-                _sql.AppendLine("ELSE");
-                using (_sql.Indent())
-                {
-                    VisitExpression(conditionalExpression.IfFalse);
-                }
-                _sql.AppendLine();
-                _sql.AppendLine("END");
+                _sql.Append("CASE WHEN (");
+                VisitExpression(conditionalExpression.Test);
+                _sql.Append(") THEN ");
+                VisitExpression(conditionalExpression.IfTrue);
+                _sql.Append(" ELSE ");
+                VisitExpression(conditionalExpression.IfFalse);
+                _sql.Append(" END");
             }
             else
             {

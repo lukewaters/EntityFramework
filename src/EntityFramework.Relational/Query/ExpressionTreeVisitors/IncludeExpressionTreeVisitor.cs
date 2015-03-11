@@ -204,12 +204,11 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                     innerJoinSelectExpression.IsDistinct = true;
                     innerJoinSelectExpression.ClearProjection();
 
-                    foreach (var columnExpression
+                    foreach (var expression
                         in innerJoinSelectExpression.OrderBy
-                            .Select(o => o.Expression)
-                            .Cast<ColumnExpression>())
+                            .Select(o => o.Expression))
                     {
-                        innerJoinSelectExpression.AddToProjection(columnExpression);
+                        innerJoinSelectExpression.AddToProjection(expression);
                     }
 
                     innerJoinSelectExpression.ClearOrderBy();
@@ -219,17 +218,7 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                     var innerJoinExpression
                         = targetSelectExpression.AddInnerJoin(innerJoinSelectExpression);
 
-                    foreach (var ordering in selectExpression.OrderBy)
-                    {
-                        var columnExpression = (ColumnExpression)ordering.Expression;
-
-                        targetSelectExpression
-                            .AddToOrderBy(
-                                columnExpression.Alias ?? columnExpression.Name,
-                                columnExpression.Property,
-                                innerJoinExpression,
-                                ordering.OrderingDirection);
-                    }
+                    UpdateOrderByColumnBinding(selectExpression.OrderBy, targetSelectExpression, innerJoinExpression);
 
                     innerJoinExpression.Predicate
                         = BuildJoinEqualityExpression(
@@ -263,6 +252,11 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                                 materializer));
                 }
             }
+        }
+
+        private static void UpdateOrderByColumnBinding(IEnumerable<Ordering> orderBy, SelectExpression targetSelectExpression, JoinExpressionBase innerJoinExpression)
+        {
+            targetSelectExpression.UpdateOrderByColumnBinding(orderBy, innerJoinExpression);
         }
 
         private static readonly MethodInfo _createValueReaderForIncludeMethodInfo
