@@ -549,7 +549,7 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
             return new DefaultSqlQueryGenerator().GenerateSql(this, new Dictionary<string, object>());
         }
 
-        public void UpdateOrderByColumnBinding(IEnumerable<Ordering> orderBy, JoinExpressionBase innerJoinExpression)
+        public virtual void UpdateOrderByColumnBinding([NotNull] IEnumerable<Ordering> orderBy, [NotNull] JoinExpressionBase innerJoinExpression)
         {
             foreach (var ordering in orderBy)
             {
