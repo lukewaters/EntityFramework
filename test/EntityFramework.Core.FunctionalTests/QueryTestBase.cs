@@ -2763,22 +2763,22 @@ namespace Microsoft.Data.Entity.FunctionalTests
 
 
         [Fact]
-        public virtual void Coalesce_orderby()
+        public virtual void OrderBy_null_coalesce_operator()
         {
             AssertQuery<Customer>(customer => customer
                 .OrderBy(c => c.Region ?? "ZZ"),
                 entryCount: 91);
         }
 
-        [Fact]
-        public virtual void Coalesce_select()
+        // [Fact] Issue 1798
+        public virtual void Select_null_coalesce_operator()
         {
             AssertQuery<Customer>(customer => customer
                 .Select(c => new { c.CustomerID, c.CompanyName, Region = c.Region ?? "ZZ" }).OrderBy(o => o.Region));
         }
 
         [Fact]
-        public virtual void Ternary_orderby()
+        public virtual void OrderBy_conditional_operator()
         {
             AssertQuery<Customer>(customer => customer
                 .OrderBy(c => c.Region == null ? "ZZ" : c.Region),
@@ -2786,14 +2786,14 @@ namespace Microsoft.Data.Entity.FunctionalTests
         }
 
         // [Fact] Issue 1798
-        public virtual void Coalesce_projection()
+        public virtual void Projection_null_coalesce_operator()
         {
             AssertQuery<Customer>(customer => customer
                 .Select(c => new { c.CustomerID, c.CompanyName, Region = c.Region ?? "ZZ" }));
         }
 
         [Fact]
-        public virtual void Coalesce_filter()
+        public virtual void Filter_coalesce_operator()
         {
             AssertQuery<Customer>(customer => customer
                 .Where(c => (c.CompanyName ?? c.ContactName) == "The Big Cheese"),
@@ -2801,13 +2801,12 @@ namespace Microsoft.Data.Entity.FunctionalTests
         }
 
         [Fact]
-        public virtual void Coalesce_nested_query_include()
+        public virtual void Nested_query_include_null_coalesce_operator()
         {
             using (var context = CreateContext())
             {
                 var customers
                     = (from c1 in context.Set<Customer>()
-
                        from c2 in context.Set<Customer>()
                            .Include(c => c.Orders)
                            .Where(c => c.CustomerID == "ALFKI")

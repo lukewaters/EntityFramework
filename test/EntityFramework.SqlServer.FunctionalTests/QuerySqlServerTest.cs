@@ -2187,9 +2187,9 @@ WHERE ([o].[CustomerID] = 'QUICK') AND ([o].[OrderDate] > @__p_0)",
                 Sql);
         }
 
-        public override void Coalesce_orderby()
+        public override void OrderBy_null_coalesce_operator()
         {
-            base.Coalesce_orderby();
+            base.OrderBy_null_coalesce_operator();
 
             Assert.Equal(
                 @"SELECT [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[CustomerID], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
@@ -2198,33 +2198,25 @@ ORDER BY COALESCE([c].[Region], 'ZZ')",
                 Sql);
         }
 
-        public override void Coalesce_select()
+        public override void Select_null_coalesce_operator()
         {
-            base.Coalesce_select();
+            base.Select_null_coalesce_operator();
 
             Assert.Equal(
-                @"SELECT [c].[CustomerID], [c].[CompanyName], [c].[Region]
+                @"SELECT [c].[CustomerID], [c].[CompanyName], COALESCE([c].[Region], 'ZZ') AS [Region]
 FROM [Customers] AS [c]
-ORDER BY COALESCE([c].[Region], 'ZZ')",
+ORDER BY [Region]",
                 Sql);
         }
 
-        public override void Ternary_orderby()
+        public override void OrderBy_conditional_operator()
         {
-            base.Ternary_orderby();
+            base.OrderBy_conditional_operator();
 
             Assert.Equal(
                 @"SELECT [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[CustomerID], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
 FROM [Customers] AS [c]
-ORDER BY CASE WHEN (
-    [c].[Region] IS NULL
-)
-THEN
-    'ZZ'
-ELSE
-    [c].[Region]
-END
-",
+ORDER BY CASE WHEN ([c].[Region] IS NULL) THEN 'ZZ' ELSE [c].[Region] END",
                 Sql);
         }
 
@@ -2371,9 +2363,9 @@ WHERE 1 = 1",
                 Sql);
         }
 
-        public override void Coalesce_projection()
+        public override void Projection_null_coalesce_operator()
         {
-            base.Coalesce_projection();
+            base.Projection_null_coalesce_operator();
 
             Assert.Equal(
                 @"SELECT [c].[CustomerID], [c].[CompanyName], COALESCE([c].[Region], 'ZZ')
@@ -2381,9 +2373,9 @@ FROM [Customers] AS [c]",
                 Sql);
         }
 
-        public override void Coalesce_filter()
+        public override void Filter_coalesce_operator()
         {
-            base.Coalesce_filter();
+            base.Filter_coalesce_operator();
 
             Assert.Equal(
                 @"SELECT [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[CustomerID], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
@@ -2392,9 +2384,9 @@ WHERE COALESCE([c].[CompanyName], [c].[ContactName]) = 'The Big Cheese'",
                 Sql);
         }
 
-        public override void Coalesce_nested_query_include()
+        public override void Nested_query_include_null_coalesce_operator()
         {
-            base.Coalesce_nested_query_include();
+            base.Nested_query_include_null_coalesce_operator();
 
             Assert.Equal(
                 @"SELECT [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[CustomerID], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
