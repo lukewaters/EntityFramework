@@ -204,7 +204,9 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                     innerJoinSelectExpression.IsDistinct = true;
                     innerJoinSelectExpression.ClearProjection();
 
-                    foreach (var expression in innerJoinSelectExpression.ExtractOrderbyColumnExpressions())
+                    foreach (var expression
+                        in innerJoinSelectExpression.OrderBy
+                            .Select(o => o.Expression))
                     {
                         innerJoinSelectExpression.AddToProjection(expression);
                     }

@@ -295,49 +295,6 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
             return projectionIndex;
         }
 
-        public virtual List<ColumnExpression> ExtractOrderbyColumnExpressions()
-        {
-            return ExtractColumnExpressions(OrderBy.Select(o => o.Expression));
-        }
-
-        private List<ColumnExpression> ExtractColumnExpressions(IEnumerable<Expression> expressions)
-        {
-            var columnList = new List<ColumnExpression>();
-
-            foreach (var expression in expressions)
-            {
-                if (expression is ColumnExpression)
-                {
-                    columnList.Add((ColumnExpression)expression);
-                }
-                else
-                {
-                    switch (expression.NodeType)
-                    {
-                        case ExpressionType.Coalesce:
-                        {
-                            var binaryExpression = expression as BinaryExpression;
-                            columnList.AddRange(ExtractColumnExpressions(new[] { binaryExpression.Left, binaryExpression.Right }));
-                            break;
-                        }
-                        case ExpressionType.Conditional:
-                        {
-                            var conditionalExpression = expression as ConditionalExpression;
-                            columnList.AddRange(ExtractColumnExpressions(new[]
-                            {
-                                conditionalExpression.Test,
-                                conditionalExpression.IfFalse,
-                                conditionalExpression.IfTrue
-                            }));
-                            break;
-                        }
-                    }
-                }
-            }
-
-            return columnList;
-        }
-
         public virtual void SetProjectionCaseExpression([NotNull] CaseExpression caseExpression)
         {
             Check.NotNull(caseExpression, nameof(caseExpression));

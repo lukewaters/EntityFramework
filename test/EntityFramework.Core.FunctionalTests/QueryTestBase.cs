@@ -2770,7 +2770,7 @@ namespace Microsoft.Data.Entity.FunctionalTests
                 entryCount: 91);
         }
 
-        // [Fact] Issue 1798
+        [Fact] //Issue 1798
         public virtual void Select_null_coalesce_operator()
         {
             AssertQuery<Customer>(customer => customer
@@ -2785,7 +2785,7 @@ namespace Microsoft.Data.Entity.FunctionalTests
                 entryCount: 91);
         }
 
-        // [Fact] Issue 1798
+        [Fact] //Issue 1798
         public virtual void Projection_null_coalesce_operator()
         {
             AssertQuery<Customer>(customer => customer

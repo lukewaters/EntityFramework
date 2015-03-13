@@ -2203,9 +2203,9 @@ ORDER BY COALESCE([c].[Region], 'ZZ')",
             base.Select_null_coalesce_operator();
 
             Assert.Equal(
-                @"SELECT [c].[CustomerID], [c].[CompanyName], COALESCE([c].[Region], 'ZZ') AS [Region]
+                @"SELECT [c].[CustomerID], [c].[CompanyName], COALESCE([c].[Region], 'ZZ')
 FROM [Customers] AS [c]
-ORDER BY [Region]",
+ORDER BY COALESCE([c].[Region], 'ZZ')",
                 Sql);
         }
 
@@ -2380,7 +2380,7 @@ FROM [Customers] AS [c]",
             Assert.Equal(
                 @"SELECT [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[CustomerID], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
 FROM [Customers] AS [c]
-WHERE COALESCE([c].[CompanyName], [c].[ContactName]) = 'The Big Cheese'",
+WHERE (COALESCE([c].[CompanyName], [c].[ContactName])) = 'The Big Cheese'",
                 Sql);
         }
 
