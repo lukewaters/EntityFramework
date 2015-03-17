@@ -218,7 +218,18 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                     var innerJoinExpression
                         = targetSelectExpression.AddInnerJoin(innerJoinSelectExpression);
 
-                    UpdateOrderByColumnBinding(selectExpression.OrderBy, targetSelectExpression, innerJoinExpression);
+                    targetSelectExpression.UpdateOrderByColumnBinding(selectExpression.OrderBy, innerJoinExpression);
+
+                    foreach (var orderByAliasExpression in innerJoinSelectExpression.OrderBy.Select(o => o.Expression).OfType<AliasExpression>())
+                    {
+                        var projectionAliasExpression = innerJoinSelectExpression.Projection
+                            .OfType<AliasExpression>().SingleOrDefault(a => a.Expression == orderByAliasExpression.Expression);
+
+                        if (projectionAliasExpression?.Alias != null)
+                        {
+                            orderByAliasExpression.Alias = projectionAliasExpression.Alias;
+                        }
+                    }
 
                     innerJoinExpression.Predicate
                         = BuildJoinEqualityExpression(
@@ -252,11 +263,6 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                                 materializer));
                 }
             }
-        }
-
-        private static void UpdateOrderByColumnBinding(IEnumerable<Ordering> orderBy, SelectExpression targetSelectExpression, JoinExpressionBase innerJoinExpression)
-        {
-            targetSelectExpression.UpdateOrderByColumnBinding(orderBy, innerJoinExpression);
         }
 
         private static readonly MethodInfo _createValueReaderForIncludeMethodInfo

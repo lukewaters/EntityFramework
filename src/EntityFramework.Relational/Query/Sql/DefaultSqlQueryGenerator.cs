@@ -109,7 +109,8 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
                     VisitExpression(selectExpression.Predicate);
 
                     if (selectExpression.Predicate is ColumnExpression
-                        || selectExpression.Predicate is ParameterExpression)
+                        || selectExpression.Predicate is ParameterExpression
+                        || (selectExpression.Predicate as AliasExpression)?.Expression is ColumnExpression)
                     {
                         _sql.Append(" = 1");
                     }
@@ -124,11 +125,24 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
                 VisitJoin(selectExpression.OrderBy, t =>
                     {
                         var columnExpression = t.Expression as ColumnExpression;
+                        var aliasExpression = t.Expression as AliasExpression;
+
                         if (columnExpression != null)
                         {
                             _sql.Append(DelimitIdentifier(columnExpression.TableAlias))
                                 .Append(".")
                                 .Append(DelimitIdentifier(columnExpression.Name));
+                        }
+                        else if (aliasExpression != null)
+                        {
+                            if (aliasExpression.Alias != null)
+                            {
+                                _sql.Append(DelimitIdentifier(aliasExpression.Alias));
+                            }
+                            else
+                            {
+                                VisitExpression(aliasExpression.Expression);
+                            }
                         }
                         else
                         {
@@ -502,102 +516,101 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
             {
                 var needClosingParen = false;
 
-            var needClosingParen = false;
+                var leftBinaryExpression = binaryExpression.Left as BinaryExpression;
 
-            var leftBinaryExpression = binaryExpression.Left as BinaryExpression;
+                if (leftBinaryExpression != null
+                    && leftBinaryExpression.NodeType != binaryExpression.NodeType)
+                {
+                    _sql.Append("(");
 
-            if (leftBinaryExpression != null
-                && leftBinaryExpression.NodeType != binaryExpression.NodeType)
-            {
-                _sql.Append("(");
+                    needClosingParen = true;
+                }
 
-                needClosingParen = true;
-            }
+                VisitExpression(binaryExpression.Left);
 
-            VisitExpression(binaryExpression.Left);
+                if (binaryExpression.IsLogicalOperation()
+                    && (binaryExpression.Left is ColumnExpression
+                        || binaryExpression.Left is ParameterExpression))
+                {
+                    _sql.Append(" = 1");
+                }
 
-            if (binaryExpression.IsLogicalOperation()
-                && (binaryExpression.Left is ColumnExpression
-                    || binaryExpression.Left is ParameterExpression))
-            {
-                _sql.Append(" = 1");
-            }
+                if (needClosingParen)
+                {
+                    _sql.Append(")");
+                }
 
-            if (needClosingParen)
-            {
-                _sql.Append(")");
-            }
+                string op;
 
-            string op;
+                switch (binaryExpression.NodeType)
+                {
+                    case ExpressionType.Equal:
+                        op = " = ";
+                        break;
+                    case ExpressionType.NotEqual:
+                        op = " <> ";
+                        break;
+                    case ExpressionType.GreaterThan:
+                        op = " > ";
+                        break;
+                    case ExpressionType.GreaterThanOrEqual:
+                        op = " >= ";
+                        break;
+                    case ExpressionType.LessThan:
+                        op = " < ";
+                        break;
+                    case ExpressionType.LessThanOrEqual:
+                        op = " <= ";
+                        break;
+                    case ExpressionType.AndAlso:
+                        op = " AND ";
+                        break;
+                    case ExpressionType.OrElse:
+                        op = " OR ";
+                        break;
+                    case ExpressionType.Add:
+                        op = " " + ConcatOperator + " ";
+                        break;
+                    case ExpressionType.Subtract:
+                        op = " - ";
+                        break;
+                    case ExpressionType.Multiply:
+                        op = " * ";
+                        break;
+                    case ExpressionType.Divide:
+                        op = " / ";
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
 
-            switch (binaryExpression.NodeType)
-            {
-                case ExpressionType.Equal:
-                    op = " = ";
-                    break;
-                case ExpressionType.NotEqual:
-                    op = " <> ";
-                    break;
-                case ExpressionType.GreaterThan:
-                    op = " > ";
-                    break;
-                case ExpressionType.GreaterThanOrEqual:
-                    op = " >= ";
-                    break;
-                case ExpressionType.LessThan:
-                    op = " < ";
-                    break;
-                case ExpressionType.LessThanOrEqual:
-                    op = " <= ";
-                    break;
-                case ExpressionType.AndAlso:
-                    op = " AND ";
-                    break;
-                case ExpressionType.OrElse:
-                    op = " OR ";
-                    break;
-                case ExpressionType.Add:
-                    op = " " + ConcatOperator + " ";
-                    break;
-                case ExpressionType.Subtract:
-                    op = " - ";
-                    break;
-                case ExpressionType.Multiply:
-                    op = " * ";
-                    break;
-                case ExpressionType.Divide:
-                    op = " / ";
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+                _sql.Append(op);
 
-            _sql.Append(op);
+                needClosingParen = false;
 
-            needClosingParen = false;
+                var rightBinaryExpression = binaryExpression.Right as BinaryExpression;
 
-            var rightBinaryExpression = binaryExpression.Right as BinaryExpression;
+                if (rightBinaryExpression != null
+                    && rightBinaryExpression.NodeType != binaryExpression.NodeType)
+                {
+                    _sql.Append("(");
 
-            if (rightBinaryExpression != null
-                && rightBinaryExpression.NodeType != binaryExpression.NodeType)
-            {
-                _sql.Append("(");
+                    needClosingParen = true;
+                }
 
-                needClosingParen = true;
-            }
+                VisitExpression(binaryExpression.Right);
 
-            VisitExpression(binaryExpression.Right);
+                if (binaryExpression.IsLogicalOperation()
+                    && (binaryExpression.Right is ColumnExpression
+                        || binaryExpression.Right is ParameterExpression))
+                {
+                    _sql.Append(" = 1");
+                }
 
-            if (binaryExpression.IsLogicalOperation()
-                && (binaryExpression.Right is ColumnExpression
-                    || binaryExpression.Right is ParameterExpression))
-            {
-                _sql.Append(" = 1");
-            }
-
-            if (needClosingParen)
-            {
-                _sql.Append(")");
+                if (needClosingParen)
+                {
+                    _sql.Append(")");
+                }
             }
 
             return binaryExpression;
@@ -649,6 +662,25 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
             }
 
             return columnExpression;
+        }
+
+        public virtual Expression VisitAliasExpression(AliasExpression aliasExpression)
+        {
+            Check.NotNull(aliasExpression, nameof(aliasExpression));
+            if (!aliasExpression.Projected)
+            {
+                VisitExpression(aliasExpression.Expression);
+                if (aliasExpression.Alias != null)
+                {
+                    _sql.Append(" AS ");
+                }
+            }
+            if (aliasExpression.Alias != null)
+            {
+                _sql.Append(DelimitIdentifier(aliasExpression.Alias));
+            }
+
+            return aliasExpression;
         }
 
         public virtual Expression VisitIsNullExpression(IsNullExpression isNullExpression)
@@ -710,7 +742,8 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
 
                 var isColumnOrParameterOperand =
                     unaryExpression.Operand is ColumnExpression
-                    || unaryExpression.Operand is ParameterExpression;
+                    || unaryExpression.Operand is ParameterExpression
+                    || (unaryExpression.Operand as AliasExpression)?.Expression is ColumnExpression;
 
                 if (!isColumnOrParameterOperand)
                 {

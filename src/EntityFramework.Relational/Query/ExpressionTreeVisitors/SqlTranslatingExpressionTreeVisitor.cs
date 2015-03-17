@@ -41,7 +41,7 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                     var left = VisitExpression(binaryExpression.Left);
                     var right = VisitExpression(binaryExpression.Right);
 
-                    return binaryExpression.Update(left, binaryExpression.Conversion, right);
+                    return new AliasExpression(binaryExpression.Update(left, binaryExpression.Conversion, right));
                 }
                 case ExpressionType.Equal:
                 case ExpressionType.NotEqual:
@@ -228,11 +228,13 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                     .BindMethodCallExpression(
                         methodCallExpression,
                         (property, querySource, selectExpression)
-                            => new ColumnExpression(
-                                _queryModelVisitor.QueryCompilationContext
-                                    .GetColumnName(property),
-                                property,
-                                selectExpression.FindTableForQuerySource(querySource)));
+                            =>
+                            {
+                                return new AliasExpression(new ColumnExpression(
+                                    _queryModelVisitor.QueryCompilationContext.GetColumnName(property),
+                                    property,
+                                    selectExpression.FindTableForQuerySource(querySource)));
+                            });
             }
 
             return null;
@@ -246,11 +248,13 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                 .BindMemberExpression(
                     memberExpression,
                     (property, querySource, selectExpression)
-                        => new ColumnExpression(
-                            _queryModelVisitor.QueryCompilationContext
-                                .GetColumnName(property),
-                            property,
-                            selectExpression.FindTableForQuerySource(querySource)));
+                        =>
+                        {
+                            return new ColumnExpression(
+                                _queryModelVisitor.QueryCompilationContext.GetColumnName(property),
+                                property,
+                                selectExpression.FindTableForQuerySource(querySource));
+                        });
         }
 
         protected override Expression VisitUnaryExpression([NotNull] UnaryExpression expression)
