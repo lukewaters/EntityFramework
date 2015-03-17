@@ -35,7 +35,7 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                     var left = VisitExpression(binaryExpression.Left);
                     var right = VisitExpression(binaryExpression.Right);
 
-                    return binaryExpression.Update(left, binaryExpression.Conversion, right);
+                    return new AliasExpression(binaryExpression.Update(left, binaryExpression.Conversion, right));
                 }
                 case ExpressionType.Equal:
                 case ExpressionType.NotEqual:

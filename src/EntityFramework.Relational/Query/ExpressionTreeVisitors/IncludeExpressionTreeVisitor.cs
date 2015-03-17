@@ -211,6 +211,7 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                         innerJoinSelectExpression.AddToProjection(expression);
                     }
 
+                    innerJoinSelectExpression.AssignAliasExpressions();
                     innerJoinSelectExpression.ClearOrderBy();
 
                     var primaryKeyProperties = navigation.EntityType.GetPrimaryKey().Properties;

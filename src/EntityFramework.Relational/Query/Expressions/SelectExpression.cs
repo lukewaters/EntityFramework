@@ -225,6 +225,15 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
             return subquery;
         }
 
+        public virtual void AssignAliasExpressions()
+        {
+            int aliasCount = 0;
+            foreach (var aliasExpression in _projection.OfType<AliasExpression>())
+            {
+                aliasExpression.Alias = "a" + aliasCount++;
+            }
+        }
+
         public virtual IReadOnlyList<Expression> Projection => _projection;
 
         public virtual Expression ProjectionExpression => _projectionExpression;
@@ -254,6 +263,12 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
         public virtual int AddToProjection([NotNull] Expression expression)
         {
             Check.NotNull(expression, nameof(expression));
+
+            var columnExpression = expression as ColumnExpression;
+            if (columnExpression != null)
+            {
+                return AddToProjection(columnExpression);
+            }
 
             _projection.Add(expression);
 

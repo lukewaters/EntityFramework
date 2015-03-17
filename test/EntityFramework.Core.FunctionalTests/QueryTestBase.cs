@@ -2821,6 +2821,20 @@ namespace Microsoft.Data.Entity.FunctionalTests
             }
         }
 
+        [Fact]
+        public virtual void Selected_column_can_coalesce()
+        {
+            using (var context = CreateContext())
+            {
+                var customers = (from c in context.Set<Customer>()
+                    orderby c.Region ?? "ZZ"
+                    select c)
+                    .ToList();
+
+                Assert.Equal(91, customers.Count);
+            }
+        }
+
         protected NorthwindContext CreateContext()
         {
             return Fixture.CreateContext();

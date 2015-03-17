@@ -2203,7 +2203,7 @@ ORDER BY COALESCE([c].[Region], 'ZZ')",
             base.Select_null_coalesce_operator();
 
             Assert.Equal(
-                @"SELECT [c].[CustomerID], [c].[CompanyName], COALESCE([c].[Region], 'ZZ')
+                @"SELECT [c].[CustomerID], [c].[CompanyName], COALESCE([c].[Region], 'ZZ') AS [a0]
 FROM [Customers] AS [c]
 ORDER BY COALESCE([c].[Region], 'ZZ')",
                 Sql);
@@ -2368,7 +2368,7 @@ WHERE 1 = 1",
             base.Projection_null_coalesce_operator();
 
             Assert.Equal(
-                @"SELECT [c].[CustomerID], [c].[CompanyName], COALESCE([c].[Region], 'ZZ')
+                @"SELECT [c].[CustomerID], [c].[CompanyName], COALESCE([c].[Region], 'ZZ') AS [a0]
 FROM [Customers] AS [c]",
                 Sql);
         }
@@ -2380,7 +2380,7 @@ FROM [Customers] AS [c]",
             Assert.Equal(
                 @"SELECT [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[CustomerID], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
 FROM [Customers] AS [c]
-WHERE (COALESCE([c].[CompanyName], [c].[ContactName])) = 'The Big Cheese'",
+WHERE COALESCE([c].[CompanyName], [c].[ContactName]) = 'The Big Cheese'",
                 Sql);
         }
 
@@ -2398,12 +2398,23 @@ ORDER BY COALESCE([c].[Region], 'ZZ'), [c].[CustomerID]
 SELECT [o].[CustomerID], [o].[OrderDate], [o].[OrderID]
 FROM [Orders] AS [o]
 INNER JOIN (
-    SELECT DISTINCT [c].[Region], [c].[CustomerID]
+    SELECT DISTINCT COALESCE([c].[Region], 'ZZ') AS [a0], [c].[CustomerID]
     FROM [Customers] AS [c1]
     CROSS JOIN [Customers] AS [c]
     WHERE [c].[CustomerID] = 'ALFKI'
 ) AS [c] ON [o].[CustomerID] = [c].[CustomerID]
-ORDER BY COALESCE([c].[Region], 'ZZ'), [c].[CustomerID]",
+ORDER BY [a0], [c].[CustomerID]",
+                Sql);
+        }
+
+        public override void Selected_column_can_coalesce()
+        {
+            base.Selected_column_can_coalesce();
+
+            Assert.Equal(
+                @"SELECT [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[CustomerID], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
+FROM [Customers] AS [c]
+ORDER BY COALESCE([c].[Region], 'ZZ')",
                 Sql);
         }
 
