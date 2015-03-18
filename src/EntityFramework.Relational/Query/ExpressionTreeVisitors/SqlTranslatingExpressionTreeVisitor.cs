@@ -201,11 +201,14 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                     .BindMethodCallExpression(
                         methodCallExpression,
                         (property, querySource, selectExpression)
-                            => new ColumnExpression(
-                                _queryModelVisitor.QueryCompilationContext
-                                    .GetColumnName(property),
-                                property,
-                                selectExpression.FindTableForQuerySource(querySource)));
+                            =>
+                            {
+                                var name = _queryModelVisitor.QueryCompilationContext.GetColumnName(property);
+                                return new AliasExpression(name, new ColumnExpression(
+                                    name,
+                                    property,
+                                    selectExpression.FindTableForQuerySource(querySource)));
+                            });
             }
 
             return null;

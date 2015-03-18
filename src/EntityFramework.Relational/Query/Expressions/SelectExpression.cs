@@ -275,6 +275,15 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
             return _projection.Count - 1;
         }
 
+//        public virtual int AddToProjection([NotNull] AliasExpression aliasExpression)
+//        {
+//            Check.NotNull(aliasExpression, nameof(aliasExpression));
+//            var projectionIndex = -1;
+//
+//
+//            return projectionIndex;
+//        }
+
         public virtual int AddToProjection([NotNull] ColumnExpression columnExpression)
         {
             Check.NotNull(columnExpression, nameof(columnExpression));
