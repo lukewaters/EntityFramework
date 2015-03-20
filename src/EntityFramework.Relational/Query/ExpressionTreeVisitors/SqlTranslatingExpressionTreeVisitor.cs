@@ -203,9 +203,8 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                         (property, querySource, selectExpression)
                             =>
                             {
-                                var name = _queryModelVisitor.QueryCompilationContext.GetColumnName(property);
-                                return new AliasExpression(name, new ColumnExpression(
-                                    name,
+                                return new AliasExpression(new ColumnExpression(
+                                    _queryModelVisitor.QueryCompilationContext.GetColumnName(property),
                                     property,
                                     selectExpression.FindTableForQuerySource(querySource)));
                             });
@@ -222,11 +221,13 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                 .BindMemberExpression(
                     memberExpression,
                     (property, querySource, selectExpression)
-                        => new ColumnExpression(
-                            _queryModelVisitor.QueryCompilationContext
-                                .GetColumnName(property),
-                            property,
-                            selectExpression.FindTableForQuerySource(querySource)));
+                        =>
+                        {
+                            return new ColumnExpression(
+                                _queryModelVisitor.QueryCompilationContext.GetColumnName(property),
+                                property,
+                                selectExpression.FindTableForQuerySource(querySource));
+                        });
         }
 
         protected override Expression VisitUnaryExpression([NotNull] UnaryExpression expression)

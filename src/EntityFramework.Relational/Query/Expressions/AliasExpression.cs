@@ -14,8 +14,6 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
 {
     public class AliasExpression : ExtensionExpression
     {
-        private string _alias;
-
         public AliasExpression([NotNull] Expression expression)
             : base(Check.NotNull(expression, nameof(expression)).Type)
         {
@@ -25,7 +23,7 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
         public AliasExpression([NotNull] string alias, [NotNull] Expression expression)
             : base(Check.NotNull(expression, nameof(expression)).Type)
         {
-            _alias = alias;
+            Alias = alias;
             Expression = expression;
         }
 

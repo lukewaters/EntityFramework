@@ -2203,7 +2203,7 @@ ORDER BY COALESCE([c].[Region], 'ZZ')",
             base.Select_null_coalesce_operator();
 
             Assert.Equal(
-                @"SELECT [c].[CustomerID], [c].[CompanyName], COALESCE([c].[Region], 'ZZ') AS [a0]
+                @"SELECT [c].[CustomerID], [c].[CompanyName], COALESCE([c].[Region], 'ZZ') AS [Coalesce]
 FROM [Customers] AS [c]
 ORDER BY COALESCE([c].[Region], 'ZZ')",
                 Sql);
@@ -2368,7 +2368,7 @@ WHERE 1 = 1",
             base.Projection_null_coalesce_operator();
 
             Assert.Equal(
-                @"SELECT [c].[CustomerID], [c].[CompanyName], COALESCE([c].[Region], 'ZZ') AS [a0]
+                @"SELECT [c].[CustomerID], [c].[CompanyName], COALESCE([c].[Region], 'ZZ') AS [Coalesce]
 FROM [Customers] AS [c]",
                 Sql);
         }
@@ -2398,12 +2398,12 @@ ORDER BY COALESCE([c].[Region], 'ZZ'), [c].[CustomerID]
 SELECT [o].[CustomerID], [o].[OrderDate], [o].[OrderID]
 FROM [Orders] AS [o]
 INNER JOIN (
-    SELECT DISTINCT COALESCE([c].[Region], 'ZZ') AS [a0], [c].[CustomerID]
+    SELECT DISTINCT COALESCE([c].[Region], 'ZZ') AS [Coalesce], [c].[CustomerID]
     FROM [Customers] AS [c1]
     CROSS JOIN [Customers] AS [c]
     WHERE [c].[CustomerID] = 'ALFKI'
 ) AS [c] ON [o].[CustomerID] = [c].[CustomerID]
-ORDER BY [a0], [c].[CustomerID]",
+ORDER BY [Coalesce], [c].[CustomerID]",
                 Sql);
         }
 

@@ -109,7 +109,8 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
                     VisitExpression(selectExpression.Predicate);
 
                     if (selectExpression.Predicate is ColumnExpression
-                        || selectExpression.Predicate is ParameterExpression)
+                        || selectExpression.Predicate is ParameterExpression
+                        || (selectExpression.Predicate as AliasExpression)?.Expression is ColumnExpression)
                     {
                         _sql.Append(" = 1");
                     }
@@ -134,7 +135,7 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
                         }
                         else if (aliasExpression != null)
                         {
-                            if (aliasExpression.Projected)
+                            if (aliasExpression.Alias != null)
                             {
                                 _sql.Append(DelimitIdentifier(aliasExpression.Alias));
                             }
@@ -679,8 +680,6 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
                 _sql.Append(DelimitIdentifier(aliasExpression.Alias));
             }
 
-            aliasExpression.Projected = true;
-
             return aliasExpression;
         }
 
@@ -743,7 +742,8 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
 
                 var isColumnOrParameterOperand =
                     unaryExpression.Operand is ColumnExpression
-                    || unaryExpression.Operand is ParameterExpression;
+                    || unaryExpression.Operand is ParameterExpression
+                    || (unaryExpression.Operand as AliasExpression)?.Expression is ColumnExpression;
 
                 if (!isColumnOrParameterOperand)
                 {

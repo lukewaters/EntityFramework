@@ -93,10 +93,10 @@ namespace Microsoft.Data.Entity.Relational.Query
                     = compositePredicateVisitor.VisitExpression(selectExpression.Predicate);
             }
 
-            foreach (var selectExpression in _queriesBySource.Values)
-            {
-                selectExpression.AssignAliasExpressions();
-            }
+//            foreach (var selectExpression in _queriesBySource.Values)
+//            {
+//                selectExpression.AssignAliasExpressions();
+//            }
         }
 
         protected override void IncludeNavigations(

@@ -225,15 +225,6 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
             return subquery;
         }
 
-        public virtual void AssignAliasExpressions()
-        {
-            int aliasCount = 0;
-            foreach (var aliasExpression in _projection.OfType<AliasExpression>())
-            {
-                aliasExpression.Alias = "a" + aliasCount++;
-            }
-        }
-
         public virtual IReadOnlyList<Expression> Projection => _projection;
 
         public virtual Expression ProjectionExpression => _projectionExpression;
@@ -265,9 +256,16 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
             Check.NotNull(expression, nameof(expression));
 
             var columnExpression = expression as ColumnExpression;
+            var aliasExpression = expression as AliasExpression;
+
             if (columnExpression != null)
             {
                 return AddToProjection(columnExpression);
+            }
+
+            if (aliasExpression != null)
+            {
+                return AddToProjection(aliasExpression);
             }
 
             _projection.Add(expression);
@@ -275,14 +273,44 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
             return _projection.Count - 1;
         }
 
-//        public virtual int AddToProjection([NotNull] AliasExpression aliasExpression)
-//        {
-//            Check.NotNull(aliasExpression, nameof(aliasExpression));
-//            var projectionIndex = -1;
-//
-//
-//            return projectionIndex;
-//        }
+        public virtual int AddToProjection([NotNull] AliasExpression aliasExpression)
+        {
+            Check.NotNull(aliasExpression, nameof(aliasExpression));
+            var projectionIndex = -1;
+            var columnExpression = aliasExpression.Expression as ColumnExpression;
+
+            projectionIndex
+                = _projection
+                    .FindIndex(e =>
+                    {
+                        var ae = e as AliasExpression;
+                        var ce = ae?.Expression as ColumnExpression;
+
+                        return (ce != null && ce.Property == columnExpression?.Property
+                                && ce.TableAlias == columnExpression.TableAlias)
+                                || ae?.Expression == aliasExpression.Expression;
+                    });
+
+            if (projectionIndex == -1)
+            {
+                if (Alias != null || columnExpression == null)
+                {
+                    var currentAlias = aliasExpression.Alias ?? columnExpression?.Name ?? aliasExpression.Expression.NodeType.ToString();
+                    var uniqueAlias = CreateUniqueProjectionAlias(currentAlias);
+
+                    if (columnExpression == null || !string.Equals(currentAlias, uniqueAlias, StringComparison.OrdinalIgnoreCase))
+                    {
+                        aliasExpression.Alias = uniqueAlias;
+                    }
+                }
+                projectionIndex = _projection.Count;
+
+                _projection.Add(new AliasExpression(aliasExpression.Alias, aliasExpression.Expression));
+                aliasExpression.Projected = true;
+            }
+
+            return projectionIndex;
+        }
 
         public virtual int AddToProjection([NotNull] ColumnExpression columnExpression)
         {
@@ -401,7 +429,20 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
         {
             Check.NotNull(orderings, nameof(orderings));
 
-            _orderBy.AddRange(orderings);
+            foreach (var ordering in orderings)
+            {
+                var aliasExpression = ordering.Expression as AliasExpression;
+
+                if (aliasExpression != null)
+                {
+                    var newAlias = new AliasExpression(aliasExpression.Alias, aliasExpression.Expression);
+                    _orderBy.Add(new Ordering(newAlias, ordering.OrderingDirection));
+                }
+                else
+                {
+                    _orderBy.Add(ordering);
+                }
+            }
         }
 
         public virtual void AddToOrderBy([NotNull] Ordering ordering)
@@ -489,7 +530,7 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
 
         private string CreateUniqueProjectionAlias(string currentAlias)
         {
-            var uniqueAlias = currentAlias;
+            var uniqueAlias = currentAlias ?? "A";
             var counter = 0;
 
             while (_projection
