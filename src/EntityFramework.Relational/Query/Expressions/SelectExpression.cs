@@ -147,7 +147,8 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
 
                     foreach (var ordering in subquery.OrderBy)
                     {
-                        var columnExpression = (ColumnExpression)ordering.Expression;
+                        var columnExpression = ordering.Expression as ColumnExpression;
+                        //var aliasExpression = ordering.Expression as AliasExpression;
 
                         _orderBy.Add(
                             new Ordering(
@@ -576,6 +577,7 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
             foreach (var ordering in orderBy)
             {
                 var columnExpression = ordering.Expression as ColumnExpression;
+                var aliasExpression = ordering.Expression as AliasExpression;
                 if (columnExpression != null)
                 {
                     AddToOrderBy(
