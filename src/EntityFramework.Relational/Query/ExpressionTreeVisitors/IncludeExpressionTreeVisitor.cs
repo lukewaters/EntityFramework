@@ -220,17 +220,6 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
 
                     targetSelectExpression.UpdateOrderByColumnBinding(selectExpression.OrderBy, innerJoinExpression);
 
-                    foreach (var orderByAliasExpression in innerJoinSelectExpression.OrderBy.Select(o => o.Expression).OfType<AliasExpression>())
-                    {
-                        var projectionAliasExpression = innerJoinSelectExpression.Projection
-                            .OfType<AliasExpression>().SingleOrDefault(a => a.Expression == orderByAliasExpression.Expression);
-
-                        if (projectionAliasExpression?.Alias != null)
-                        {
-                            orderByAliasExpression.Alias = projectionAliasExpression.Alias;
-                        }
-                    }
-
                     innerJoinExpression.Predicate
                         = BuildJoinEqualityExpression(
                             navigation,

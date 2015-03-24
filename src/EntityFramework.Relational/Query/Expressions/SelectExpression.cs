@@ -148,15 +148,27 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
                     foreach (var ordering in subquery.OrderBy)
                     {
                         var columnExpression = ordering.Expression as ColumnExpression;
-                        //var aliasExpression = ordering.Expression as AliasExpression;
+                        var aliasExpression = ordering.Expression as AliasExpression;
 
-                        _orderBy.Add(
-                            new Ordering(
-                                new ColumnExpression(
-                                    columnExpression.Name,
-                                    columnExpression.Property,
-                                    subquery),
-                                ordering.OrderingDirection));
+                        if (columnExpression != null)
+                        {
+                            _orderBy.Add(
+                                new Ordering(
+                                    new ColumnExpression(
+                                        columnExpression.Name,
+                                        columnExpression.Property,
+                                        subquery),
+                                    ordering.OrderingDirection));
+                        }
+                        else if (aliasExpression != null)
+                        {
+                            var expression = UpdateColumnExpression(aliasExpression.Expression, subquery);
+
+                            _orderBy.Add(
+                                new Ordering(
+                                    new AliasExpression(aliasExpression.Alias, expression),
+                                    ordering.OrderingDirection));
+                        }
                     }
                 }
 
@@ -192,14 +204,21 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
 
             var columnAliasCounter = 0;
 
-            foreach (var columnExpression in _projection.OfType<ColumnExpression>())
+            foreach (var expression in _projection)
             {
-                if (subquery._projection.OfType<ColumnExpression>().Any(ce => ce.Name == columnExpression.Name))
+                var columnExpression = expression as ColumnExpression;
+                var aliasExpression = expression as AliasExpression;
+                if (columnExpression != null && subquery._projection.OfType<ColumnExpression>().Any(ce => ce.Name == columnExpression.Name))
                 {
                     columnExpression.Alias = "c" + columnAliasCounter++;
                 }
+                else if (aliasExpression != null && subquery._projection.OfType<AliasExpression>().Any(ae => ae.Alias == aliasExpression.Alias))
+                {
+                    aliasExpression.Alias = "a" + columnAliasCounter++;
+                }
 
-                subquery._projection.Add(columnExpression);
+
+                subquery._projection.Add((Expression)columnExpression ?? (Expression)aliasExpression);
             }
 
             subquery.AddTables(_tables);
@@ -305,6 +324,15 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
                     }
                 }
                 projectionIndex = _projection.Count;
+
+                foreach (var orderByAliasExpression in _orderBy.Select(o => o.Expression).OfType<AliasExpression>())
+                {
+                    if (orderByAliasExpression.Expression.ToString() == aliasExpression.Expression.ToString())
+                    {
+                        orderByAliasExpression.Alias = aliasExpression.Alias;
+                        orderByAliasExpression.Projected = true;
+                    }
+                }
 
                 _projection.Add(new AliasExpression(aliasExpression.Alias, aliasExpression.Expression));
                 aliasExpression.Projected = true;
@@ -577,7 +605,6 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
             foreach (var ordering in orderBy)
             {
                 var columnExpression = ordering.Expression as ColumnExpression;
-                var aliasExpression = ordering.Expression as AliasExpression;
                 if (columnExpression != null)
                 {
                     AddToOrderBy(
@@ -603,10 +630,15 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
         private static Expression UpdateColumnExpression(Expression expression, TableExpressionBase tableExpression)
         {
             var columnExpression = expression as ColumnExpression;
+            var aliasExpression = expression as AliasExpression;
 
             if (columnExpression != null)
             {
                 return new ColumnExpression(columnExpression.Alias ?? columnExpression.Name, columnExpression.Property, tableExpression);
+            }
+            if (aliasExpression != null)
+            {
+                return new AliasExpression(aliasExpression.Alias, UpdateColumnExpression(aliasExpression.Expression, tableExpression));
             }
             switch (expression.NodeType)
             {
@@ -615,8 +647,7 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
                         var binaryExpression = expression as BinaryExpression;
                         var left = UpdateColumnExpression(binaryExpression.Left, tableExpression);
                         var right = UpdateColumnExpression(binaryExpression.Right, tableExpression);
-                        binaryExpression.Update(left, binaryExpression.Conversion, right);
-                        break;
+                        return binaryExpression.Update(left, binaryExpression.Conversion, right);
                     }
                 case ExpressionType.Conditional:
                     {
@@ -624,8 +655,7 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
                         var test = UpdateColumnExpression(conditionalExpression.Test, tableExpression);
                         var ifTrue = UpdateColumnExpression(conditionalExpression.IfTrue, tableExpression);
                         var ifFalse = UpdateColumnExpression(conditionalExpression.IfFalse, tableExpression);
-                        conditionalExpression.Update(test, ifTrue, ifFalse);
-                        break;
+                        return conditionalExpression.Update(test, ifTrue, ifFalse);
                     }
             }
             return expression;

@@ -2856,37 +2856,25 @@ namespace Microsoft.Data.Entity.FunctionalTests
         [Fact]
         public virtual void Take_skip_null_coalesce_operator()
         {
-            using (var context = CreateContext())
-            {
-                AssertQuery<Customer>(
-                cs => cs.OrderBy(c => c.Region ?? "ZZ").Take(3).Skip(2).Distinct(),
-                entryCount: 3);
+            AssertQuery<Customer>(
+                cs => cs.OrderBy(c => c.Region ?? "ZZ").Take(10).Skip(5).Distinct(),
+                entryCount: 5);
+        }
 
-                //var customers
-                //    = (from c1 in context.Set<Customer>()
-                //       from c2 in context.Set<Customer>()
-                //           .Include(c => c.Orders)
-                //           .Where(c => c.CustomerID == "ALFKI")
-                //       orderby c2.Region ?? "ZZ"
-                //       select c2)
-                //        .ToList();
-
-                //Assert.Equal(91, customers.Count);
-                //Assert.Equal(546, customers.SelectMany(c => c.Orders).Count());
-                //Assert.True(customers.SelectMany(c => c.Orders).All(o => o.Customer != null));
-                //Assert.Equal(1 + 6, context.ChangeTracker.Entries().Count());
-            }
+        [Fact]
+        public virtual void Select_take_null_coalesce_operator()
+        {
+            AssertQuery<Customer>(
+            cs => cs.Select(c => new { c.CustomerID, c.CompanyName, Region = c.Region ?? "ZZ" }).OrderBy(c => c.Region).Take(5),//.Take(10).Skip(5).Distinct(),
+            entryCount: 0);
         }
 
         [Fact]
         public virtual void Select_take_skip_null_coalesce_operator()
         {
-            using (var context = CreateContext())
-            {
                 AssertQuery<Customer>(
-                cs => cs.Select(c => new { c.CustomerID, c.CompanyName, Region = c.Region ?? "ZZ" }).OrderBy(c => c.Region).Take(3).Skip(2).Distinct(),
-                entryCount: 3);
-            }
+                cs => cs.Select(c => new { c.CustomerID, c.CompanyName, Region = c.Region ?? "ZZ" }).OrderBy(c => c.Region).Take(10).Skip(5),
+                entryCount: 0);
         }
 
         [Fact]
