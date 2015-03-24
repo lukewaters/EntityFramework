@@ -2806,8 +2806,8 @@ namespace Microsoft.Data.Entity.FunctionalTests
             using (var context = CreateContext())
             {
                 AssertQuery<Customer>(
-                cs => cs.OrderBy(c => c.Region ?? "ZZ").Take(3).Skip(2).Distinct(),
-                entryCount: 3);
+                cs => cs.OrderBy(c => c.Region ?? "ZZ").Take(10).Skip(5).Distinct(),
+                entryCount: 5);
 
                 //var customers
                 //    = (from c1 in context.Set<Customer>()
@@ -2826,13 +2826,24 @@ namespace Microsoft.Data.Entity.FunctionalTests
         }
 
         [Fact]
+        public virtual void Select_take_null_coalesce_operator()
+        {
+            using (var context = CreateContext())
+            {
+                AssertQuery<Customer>(
+                cs => cs.Select(c => new { c.CustomerID, c.CompanyName, Region = c.Region ?? "ZZ" }).OrderBy(c => c.Region).Take(5),//.Take(10).Skip(5).Distinct(),
+                entryCount: 0);
+            }
+        }
+
+        [Fact]
         public virtual void Select_take_skip_null_coalesce_operator()
         {
             using (var context = CreateContext())
             {
                 AssertQuery<Customer>(
-                cs => cs.Select(c => new { c.CustomerID, c.CompanyName, Region = c.Region ?? "ZZ" }).OrderBy(c => c.Region).Take(3).Skip(2).Distinct(),
-                entryCount: 3);
+                cs => cs.Select(c => new { c.CustomerID, c.CompanyName, Region = c.Region ?? "ZZ" }).OrderBy(c => c.Region).Take(10).Skip(5),
+                entryCount: 0);
             }
         }
 

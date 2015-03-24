@@ -2205,7 +2205,7 @@ ORDER BY COALESCE([c].[Region], 'ZZ')",
             Assert.Equal(
                 @"SELECT [c].[CustomerID], [c].[CompanyName], COALESCE([c].[Region], 'ZZ') AS [Coalesce]
 FROM [Customers] AS [c]
-ORDER BY COALESCE([c].[Region], 'ZZ')",
+ORDER BY [Coalesce]",
                 Sql);
         }
 
@@ -2394,9 +2394,9 @@ FROM (
     FROM (
         SELECT TOP(10) [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[CustomerID], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
         FROM [Customers] AS [c]
-        ORDER BY COALESCE([C].[Region], 'ZZ'))
+        ORDER BY COALESCE([c].[Region], 'ZZ')
     ) AS [t0]
-    ORDER BY COALESCE([t0].[Region], 'ZZ')) OFFSET 5 ROWS
+    ORDER BY COALESCE([t0].[Region], 'ZZ') OFFSET 5 ROWS
 ) AS [t1]", Sql);
 
             /*
@@ -2419,20 +2419,28 @@ ORDER BY [Coalesce], [c].[CustomerID]",
                 Sql);*/
         }
 
+        public override void Select_take_null_coalesce_operator()
+        {
+            base.Select_take_null_coalesce_operator();
+
+            Assert.Equal(@"SELECT TOP(5) [c].[CustomerID], [c].[CompanyName], COALESCE([c].[Region], 'ZZ') AS [Coalesce]
+FROM [Customers] AS [c]
+ORDER BY [Coalesce]", Sql);
+        }
+
         public override void Select_take_skip_null_coalesce_operator()
         {
             base.Select_take_skip_null_coalesce_operator();
 
-            Assert.Equal(@"SELECT DISTINCT [t1].*
+            Assert.Equal(
+                @"SELECT [t0].*
 FROM (
-    SELECT [t0].*
-    FROM (
-        SELECT TOP(10) SELECT [c].[CustomerID], [c].[CompanyName], COALESCE([c].[Region], 'ZZ') AS [Coalesce]
-        FROM [Customers] AS [c]
-        ORDER BY [Coalesce])
-    ) AS [t0]
-    ORDER BY [t0].[Coalesce]) OFFSET 5 ROWS
-) AS [t1]", Sql);
+    SELECT TOP(10) [c].[CustomerID], [c].[CompanyName], COALESCE([c].[Region], 'ZZ') AS [Coalesce]
+    FROM [Customers] AS [c]
+    ORDER BY [Coalesce]
+) AS [t0]
+ORDER BY [Coalesce] OFFSET 5 ROWS", 
+            Sql);
         }
 
         public override void Selected_column_can_coalesce()

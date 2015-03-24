@@ -50,5 +50,10 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
         {
             return this;
         }
+
+        public virtual bool Same(AliasExpression aliasExpression)
+        {
+            return Expression.Equals(aliasExpression.Expression);
+        }
     }
 }
