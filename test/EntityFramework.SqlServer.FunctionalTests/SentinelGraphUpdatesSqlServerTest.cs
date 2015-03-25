@@ -26,5 +26,10 @@ namespace Microsoft.Data.Entity.SqlServer.FunctionalTests
                 SetSentinelValues(modelBuilder);
             }
         }
+
+        //public override void Save_changed_optional_one_to_one_with_alternate_key(ChangeMechanism changeMechanism, bool useExistingEntities)
+        //{
+        //    base.Save_changed_optional_one_to_one_with_alternate_key(changeMechanism, useExistingEntities);
+        //}
     }
 }

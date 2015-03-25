@@ -292,9 +292,10 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                     var memberItem = contains.Item as MemberExpression;
                     if (parameter != null && memberItem != null)
                     {
-                        var columnExpression = (ColumnExpression)VisitMemberExpression(memberItem);
+                        var rawExpression = VisitMemberExpression(memberItem);
+                        var aliasExpression = rawExpression as AliasExpression;
 
-                        return new InExpression(columnExpression, new[] { parameter });
+                        return new InExpression(aliasExpression, new[] { parameter });
                     }
                 }
             }

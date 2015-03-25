@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Microsoft.Data.Entity.Metadata;
 using Microsoft.Data.Entity.Relational.Query.Sql;
 using Microsoft.Data.Entity.Utilities;
 using Remotion.Linq.Clauses.Expressions;
@@ -33,6 +34,39 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
 
         public virtual bool Projected { get; set; } = false;
 
+        public virtual string Name
+        {
+            get
+            {
+                return (Expression as ColumnExpression)?.Name ?? Expression.NodeType.ToString();
+            }
+        }
+
+        public virtual string TableAlias
+        {
+            get
+            {
+                return (Expression as ColumnExpression)?.TableAlias;
+            }
+        }
+
+        public virtual IProperty ColumnProperty
+        {
+            get
+            {
+                return (Expression as ColumnExpression)?.Property;
+            }
+        }
+
+        public virtual ColumnExpression ColumnExpression
+        {
+            get
+            {
+                var columnExpression = Expression as ColumnExpression;
+                columnExpression.Alias = Alias;
+                return columnExpression;
+            }
+        }
 
         public override Expression Accept([NotNull] ExpressionTreeVisitor visitor)
         {

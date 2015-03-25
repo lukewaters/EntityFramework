@@ -61,7 +61,7 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
         private Expression TryOptimize(
             BinaryExpression binaryExpression,
             ExpressionType equalityType,
-            Func<ColumnExpression, List<Expression>, Expression> inExpressionFactory)
+            Func<AliasExpression, List<Expression>, Expression> inExpressionFactory)
         {
             var leftExpression = VisitExpression(binaryExpression.Left);
             var rightExpression = VisitExpression(binaryExpression.Right);
@@ -134,7 +134,7 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
             return null;
         }
 
-        private static ColumnExpression MatchEqualityExpression(
+        private static AliasExpression MatchEqualityExpression(
             Expression expression,
             ExpressionType equalityType,
             out Expression nonColumnExpression)
@@ -153,15 +153,19 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
 
                 if (nonColumnExpression != null)
                 {
-                    return binaryExpression.Right as ColumnExpression
-                           ?? binaryExpression.Left as ColumnExpression;
+                    if (binaryExpression.Right is ColumnExpression || binaryExpression.Left is ColumnExpression)
+                    {
+                        throw new NotImplementedException("Should not have any raw columnExpressions");
+                    }
+                    return (binaryExpression.Right as AliasExpression)
+                           ?? (binaryExpression.Left as AliasExpression);
                 }
             }
 
             return null;
         }
 
-        private static ColumnExpression MatchInExpression(
+        private static AliasExpression MatchInExpression(
             Expression expression,
             ref IReadOnlyList<Expression> values)
         {
@@ -170,13 +174,13 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
             {
                 values = inExpression.Values;
 
-                return inExpression.Column;
+                return inExpression.Alias;
             }
 
             return null;
         }
 
-        private static ColumnExpression MatchNotInExpression(
+        private static AliasExpression MatchNotInExpression(
             Expression expression,
             ref IReadOnlyList<Expression> values)
         {

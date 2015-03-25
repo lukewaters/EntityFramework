@@ -303,7 +303,7 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
             var inValues = ProcessInExpressionValues(inExpression.Values);
             if (inValues.Count > 0)
             {
-                VisitExpression(inExpression.Column);
+                VisitExpression(inExpression.Alias);
 
                 _sql.Append(" IN (");
 
@@ -324,7 +324,7 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
             var inValues = ProcessInExpressionValues(inExpression.Values);
             if (inValues.Count > 0)
             {
-                VisitExpression(inExpression.Column);
+                VisitExpression(inExpression.Alias);
 
                 _sql.Append(" NOT IN (");
 
@@ -655,7 +655,7 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
                 .Append(".")
                 .Append(DelimitIdentifier(columnExpression.Name));
 
-            if (columnExpression.Alias != null)
+            if (columnExpression.Alias != null && columnExpression.Alias != columnExpression.Name)
             {
                 _sql.Append(" AS ")
                     .Append(DelimitIdentifier(columnExpression.Alias));
@@ -670,12 +670,12 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
             if (!aliasExpression.Projected)
             {
                 VisitExpression(aliasExpression.Expression);
-                if (aliasExpression.Alias != null)
+                if (aliasExpression.Alias != null && aliasExpression.Alias != aliasExpression.Name)
                 {
                     _sql.Append(" AS ");
                 }
             }
-            if (aliasExpression.Alias != null)
+            if (aliasExpression.Alias != null && aliasExpression.Alias != aliasExpression.Name)
             {
                 _sql.Append(DelimitIdentifier(aliasExpression.Alias));
             }
