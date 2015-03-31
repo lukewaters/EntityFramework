@@ -206,19 +206,14 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
 
             foreach (var expression in _projection)
             {
-                var columnExpression = expression as ColumnExpression;
                 var aliasExpression = expression as AliasExpression;
-                if (columnExpression != null && subquery._projection.OfType<ColumnExpression>().Any(ce => ce.Name == columnExpression.Name))
+                var columnExpression = aliasExpression?.ColumnExpression;
+                if (columnExpression != null && subquery._projection.OfType<AliasExpression>().Any(ae => ae.ColumnExpression?.Name == columnExpression.Name))
                 {
-                    columnExpression.Alias = "c" + columnAliasCounter++;
-                }
-                else if (aliasExpression != null && subquery._projection.OfType<AliasExpression>().Any(ae => ae.Alias == aliasExpression.Alias))
-                {
-                    aliasExpression.Alias = "a" + columnAliasCounter++;
+                    aliasExpression.Alias = "c" + columnAliasCounter++;
                 }
 
-
-                subquery._projection.Add((Expression)columnExpression ?? (Expression)aliasExpression);
+                subquery._projection.Add(aliasExpression);
             }
 
             subquery.AddTables(_tables);
@@ -264,8 +259,8 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
             {
                 projectionIndex = _projection.Count;
 
-                _projection.Add(
-                    new ColumnExpression(column, property, FindTableForQuerySource(querySource)));
+                AddToProjection(new AliasExpression(
+                    new ColumnExpression(column, property, FindTableForQuerySource(querySource))));
             }
 
             return projectionIndex;
@@ -297,14 +292,14 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
         {
             Check.NotNull(aliasExpression, nameof(aliasExpression));
             var projectionIndex = -1;
-            var columnExpression = aliasExpression.Expression as ColumnExpression;
+            var columnExpression = aliasExpression.ColumnExpression;
 
             projectionIndex
                 = _projection
                     .FindIndex(e =>
                     {
                         var ae = e as AliasExpression;
-                        var ce = ae?.Expression as ColumnExpression;
+                        var ce = ae?.ColumnExpression;
 
                         return (ce != null && ce.Property == columnExpression?.Property
                                 && ce.TableAlias == columnExpression.TableAlias)
@@ -325,12 +320,15 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
                 }
                 projectionIndex = _projection.Count;
 
-                foreach (var orderByAliasExpression in _orderBy.Select(o => o.Expression).OfType<AliasExpression>())
+                if (aliasExpression.Alias != null)
                 {
-                    if (orderByAliasExpression.Expression.ToString() == aliasExpression.Expression.ToString())
+                    foreach (var orderByAliasExpression in _orderBy.Select(o => o.Expression).OfType<AliasExpression>())
                     {
-                        orderByAliasExpression.Alias = aliasExpression.Alias;
-                        orderByAliasExpression.Projected = true;
+                        if (orderByAliasExpression.Expression.ToString() == aliasExpression.Expression.ToString())
+                        {
+                            orderByAliasExpression.Alias = aliasExpression.Alias;
+                            orderByAliasExpression.Projected = true;
+                        }
                     }
                 }
 
@@ -349,7 +347,8 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
                 = _projection
                     .FindIndex(e =>
                         {
-                            var ce = e as ColumnExpression;
+                            var ae = e as AliasExpression;
+                            var ce = ae?.ColumnExpression;
 
                             return ce?.Property == columnExpression.Property
                                    && ce.TableAlias == columnExpression.TableAlias;
@@ -357,20 +356,22 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
 
             if (projectionIndex == -1)
             {
+                var aliasExpression = new AliasExpression(columnExpression);
+
                 if (Alias != null)
                 {
-                    var currentAlias = columnExpression.Alias ?? columnExpression.Name;
+                    var currentAlias = columnExpression.Name;
                     var uniqueAlias = CreateUniqueProjectionAlias(currentAlias);
 
                     if (!string.Equals(currentAlias, uniqueAlias, StringComparison.OrdinalIgnoreCase))
                     {
-                        columnExpression.Alias = uniqueAlias;
+                        aliasExpression.Alias = uniqueAlias;
                     }
                 }
 
                 projectionIndex = _projection.Count;
 
-                _projection.Add(columnExpression);
+                _projection.Add(aliasExpression);
             }
 
             return projectionIndex;
@@ -427,14 +428,15 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
             return _projection
                 .FindIndex(e =>
                     {
-                        var ce = e as ColumnExpression;
+                        var ae = e as AliasExpression;
+                        var ce = ae?.ColumnExpression;
 
                         return ce?.Property == property
                                && ce.TableAlias == table.Alias;
                     });
         }
 
-        public virtual ColumnExpression AddToOrderBy(
+        public virtual AliasExpression AddToOrderBy(
             [NotNull] string column,
             [NotNull] IProperty property,
             [NotNull] TableExpressionBase table,
@@ -445,13 +447,14 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
             Check.NotNull(table, nameof(table));
 
             var columnExpression = new ColumnExpression(column, property, table);
+            var aliasExpression = new AliasExpression(columnExpression);
 
-            if (_orderBy.FindIndex(o => o.Expression.Equals(columnExpression)) == -1)
+            if (_orderBy.FindIndex(o => (o.Expression as AliasExpression)?.ColumnExpression.Equals(columnExpression) ?? false) == -1)
             {
-                _orderBy.Add(new Ordering(columnExpression, orderingDirection));
+                _orderBy.Add(new Ordering(aliasExpression, orderingDirection));
             }
 
-            return columnExpression;
+            return aliasExpression;
         }
 
         public virtual void AddToOrderBy([NotNull] IEnumerable<Ordering> orderings)
@@ -461,11 +464,16 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
             foreach (var ordering in orderings)
             {
                 var aliasExpression = ordering.Expression as AliasExpression;
+                var columnExpression = ordering.Expression as ColumnExpression;
 
                 if (aliasExpression != null)
                 {
                     var newAlias = new AliasExpression(aliasExpression.Alias, aliasExpression.Expression);
                     _orderBy.Add(new Ordering(newAlias, ordering.OrderingDirection));
+                }
+                else if (columnExpression != null)
+                {
+                    _orderBy.Add(new Ordering(new AliasExpression(columnExpression), ordering.OrderingDirection));
                 }
                 else
                 {
@@ -478,7 +486,12 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
         {
             Check.NotNull(ordering, nameof(ordering));
 
-            _orderBy.Add(ordering);
+            var columnExpression = (ordering.Expression as AliasExpression)?.ColumnExpression;
+
+            if (_orderBy.FindIndex(o => (o.Expression as AliasExpression)?.ColumnExpression.Equals(columnExpression) ?? false) == -1)
+            {
+                _orderBy.Add(ordering);
+            }
         }
 
         public virtual void PrependToOrderBy([NotNull] IEnumerable<Ordering> orderings)
@@ -511,7 +524,7 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
         {
             Check.NotNull(tableExpression, nameof(tableExpression));
 
-            return AddInnerJoin(tableExpression, Enumerable.Empty<ColumnExpression>());
+            return AddInnerJoin(tableExpression, Enumerable.Empty<AliasExpression>());
         }
 
         public virtual JoinExpressionBase AddInnerJoin(
@@ -563,8 +576,8 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
             var counter = 0;
 
             while (_projection
-                .OfType<ColumnExpression>()
-                .Any(p => string.Equals(p.Alias ?? p.Name, uniqueAlias, StringComparison.OrdinalIgnoreCase)))
+                .OfType<AliasExpression>()
+                .Any(p => string.Equals(p.Alias ?? p.ColumnExpression?.Name, uniqueAlias, StringComparison.OrdinalIgnoreCase)))
             {
                 uniqueAlias = currentAlias + counter++;
             }
@@ -604,11 +617,16 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
         {
             foreach (var ordering in orderBy)
             {
-                var columnExpression = ordering.Expression as ColumnExpression;
+                var aliasExpression = ordering.Expression as AliasExpression;
+                var columnExpression = aliasExpression?.ColumnExpression;
+
                 if (columnExpression != null)
                 {
+                    var matchingExpression = ((SelectExpression)innerJoinExpression.TableExpression).Projection.OfType<AliasExpression>()
+                        .SingleOrDefault(ae => ae.ColumnExpression.Equals(columnExpression));
+
                     AddToOrderBy(
-                        columnExpression.Alias ?? columnExpression.Name,
+                        matchingExpression?.Alias ?? aliasExpression.Alias ?? columnExpression.Name,
                         columnExpression.Property,
                         innerJoinExpression,
                         ordering.OrderingDirection);
@@ -629,12 +647,12 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
 
         private static Expression UpdateColumnExpression(Expression expression, TableExpressionBase tableExpression)
         {
-            var columnExpression = expression as ColumnExpression;
             var aliasExpression = expression as AliasExpression;
+            var columnExpression = expression as ColumnExpression;
 
             if (columnExpression != null)
             {
-                return new ColumnExpression(columnExpression.Alias ?? columnExpression.Name, columnExpression.Property, tableExpression);
+                return new ColumnExpression(columnExpression.Name, columnExpression.Property, tableExpression);
             }
             if (aliasExpression != null)
             {

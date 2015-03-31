@@ -19,7 +19,7 @@ namespace Microsoft.Data.Entity.SqlServer.FunctionalTests
 
         public AsyncQuerySqlServerTest(NorthwindQuerySqlServerFixture fixture)
             : base(fixture)
-        { 
+        {
         }
     }
 }

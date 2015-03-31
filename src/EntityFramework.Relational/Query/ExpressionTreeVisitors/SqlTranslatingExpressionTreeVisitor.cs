@@ -181,8 +181,8 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                     && constantExpression.Value == null)
                 {
                     var columnExpression
-                        = left as ColumnExpression
-                          ?? right as ColumnExpression;
+                        = (left as AliasExpression)?.ColumnExpression
+                          ?? (right as AliasExpression)?.ColumnExpression;
 
                     if (columnExpression != null)
                     {
@@ -250,10 +250,10 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                     (property, querySource, selectExpression)
                         =>
                         {
-                            return new ColumnExpression(
+                            return new AliasExpression(new ColumnExpression(
                                 _queryModelVisitor.QueryCompilationContext.GetColumnName(property),
                                 property,
-                                selectExpression.FindTableForQuerySource(querySource));
+                                selectExpression.FindTableForQuerySource(querySource)));
                         });
         }
 
@@ -319,9 +319,9 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                     var memberItem = contains.Item as MemberExpression;
                     if (parameter != null && memberItem != null)
                     {
-                        var columnExpression = (ColumnExpression)VisitMemberExpression(memberItem);
+                        var aliasExpression = (AliasExpression)VisitMemberExpression(memberItem);
 
-                        return new InExpression(columnExpression, new[] { parameter });
+                        return new InExpression(aliasExpression, new[] { parameter });
                     }
                 }
             }

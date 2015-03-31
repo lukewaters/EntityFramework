@@ -126,7 +126,6 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
                     {
                         var columnExpression = t.Expression as ColumnExpression;
                         var aliasExpression = t.Expression as AliasExpression;
-
                         if (columnExpression != null)
                         {
                             _sql.Append(DelimitIdentifier(columnExpression.TableAlias))
@@ -303,7 +302,7 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
             var inValues = ProcessInExpressionValues(inExpression.Values);
             if (inValues.Count > 0)
             {
-                VisitExpression(inExpression.Column);
+                VisitExpression(inExpression.Alias);
 
                 _sql.Append(" IN (");
 
@@ -324,7 +323,7 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
             var inValues = ProcessInExpressionValues(inExpression.Values);
             if (inValues.Count > 0)
             {
-                VisitExpression(inExpression.Column);
+                VisitExpression(inExpression.Alias);
 
                 _sql.Append(" NOT IN (");
 
@@ -529,8 +528,9 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
                 VisitExpression(binaryExpression.Left);
 
                 if (binaryExpression.IsLogicalOperation()
-                    && (binaryExpression.Left is ColumnExpression
-                        || binaryExpression.Left is ParameterExpression))
+                    && ( binaryExpression.Left is ColumnExpression
+                        || binaryExpression.Left is ParameterExpression
+                        || (binaryExpression.Left as AliasExpression)?.Expression is ColumnExpression))
                 {
                     _sql.Append(" = 1");
                 }
@@ -602,7 +602,8 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
 
                 if (binaryExpression.IsLogicalOperation()
                     && (binaryExpression.Right is ColumnExpression
-                        || binaryExpression.Right is ParameterExpression))
+                        || binaryExpression.Right is ParameterExpression
+                        || (binaryExpression.Right as AliasExpression)?.Expression is ColumnExpression))
                 {
                     _sql.Append(" = 1");
                 }
@@ -631,8 +632,8 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
                     && parameterValue == null)
                 {
                     var columnExpression
-                        = binaryExpression.Left as ColumnExpression
-                          ?? binaryExpression.Right as ColumnExpression;
+                        = (binaryExpression.Left as AliasExpression)?.ColumnExpression
+                          ?? (binaryExpression.Right as AliasExpression)?.ColumnExpression;
 
                     if (columnExpression != null)
                     {
@@ -654,12 +655,6 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
             _sql.Append(DelimitIdentifier(columnExpression.TableAlias))
                 .Append(".")
                 .Append(DelimitIdentifier(columnExpression.Name));
-
-            if (columnExpression.Alias != null)
-            {
-                _sql.Append(" AS ")
-                    .Append(DelimitIdentifier(columnExpression.Alias));
-            }
 
             return columnExpression;
         }

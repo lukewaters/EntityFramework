@@ -2865,7 +2865,7 @@ namespace Microsoft.Data.Entity.FunctionalTests
         public virtual void Select_take_null_coalesce_operator()
         {
             AssertQuery<Customer>(
-            cs => cs.Select(c => new { c.CustomerID, c.CompanyName, Region = c.Region ?? "ZZ" }).OrderBy(c => c.Region).Take(5),//.Take(10).Skip(5).Distinct(),
+            cs => cs.Select(c => new { c.CustomerID, c.CompanyName, Region = c.Region ?? "ZZ" }).OrderBy(c => c.Region).Take(5),
             entryCount: 0);
         }
 

@@ -20,7 +20,7 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
             Expression = expression;
         }
 
-        public AliasExpression([NotNull] string alias, [NotNull] Expression expression)
+        public AliasExpression([CanBeNull] string alias, [NotNull] Expression expression)
             : base(Check.NotNull(expression, nameof(expression)).Type)
         {
             Alias = alias;
@@ -30,6 +30,8 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
         public virtual string Alias{ get; [param: NotNull] set; }
 
         public virtual Expression Expression { get; [param: NotNull] set; }
+
+        public virtual ColumnExpression ColumnExpression => Expression as ColumnExpression;
 
         public virtual bool Projected { get; set; } = false;
 
@@ -49,6 +51,11 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
         protected override Expression VisitChildren(ExpressionTreeVisitor visitor)
         {
             return this;
+        }
+
+        public override string ToString()
+        {
+            return ColumnExpression?.ToString() ?? Expression.NodeType + " " + Alias;
         }
     }
 }

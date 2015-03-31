@@ -2261,7 +2261,7 @@ WHERE ([o].[CustomerID] = 'QUICK') AND ([o].[OrderDate] > @__p_0)",
             base.OrderBy_null_coalesce_operator();
 
             Assert.Equal(
-                @"SELECT [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[CustomerID], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
+                @"SELECT [c].[CustomerID], [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
 FROM [Customers] AS [c]
 ORDER BY COALESCE([c].[Region], 'ZZ')",
                 Sql);
@@ -2283,7 +2283,7 @@ ORDER BY [Coalesce]",
             base.OrderBy_conditional_operator();
 
             Assert.Equal(
-                @"SELECT [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[CustomerID], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
+                @"SELECT [c].[CustomerID], [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
 FROM [Customers] AS [c]
 ORDER BY CASE WHEN ([c].[Region] IS NULL) THEN 'ZZ' ELSE [c].[Region] END",
                 Sql);
@@ -2447,7 +2447,7 @@ FROM [Customers] AS [c]",
             base.Filter_coalesce_operator();
 
             Assert.Equal(
-                @"SELECT [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[CustomerID], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
+                @"SELECT [c].[CustomerID], [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
 FROM [Customers] AS [c]
 WHERE COALESCE([c].[CompanyName], [c].[ContactName]) = 'The Big Cheese'",
                 Sql);
@@ -2461,7 +2461,7 @@ WHERE COALESCE([c].[CompanyName], [c].[ContactName]) = 'The Big Cheese'",
 FROM (
     SELECT [t0].*
     FROM (
-        SELECT TOP(10) [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[CustomerID], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
+        SELECT TOP(10) [c].[CustomerID], [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
         FROM [Customers] AS [c]
         ORDER BY COALESCE([c].[Region], 'ZZ')
     ) AS [t0]
@@ -2498,7 +2498,7 @@ ORDER BY [Coalesce] OFFSET 5 ROWS",
             base.Selected_column_can_coalesce();
 
             Assert.Equal(
-                @"SELECT [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[CustomerID], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
+                @"SELECT [c].[CustomerID], [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
 FROM [Customers] AS [c]
 ORDER BY COALESCE([c].[Region], 'ZZ')",
                 Sql);

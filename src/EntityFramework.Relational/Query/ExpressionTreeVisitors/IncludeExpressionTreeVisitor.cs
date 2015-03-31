@@ -131,10 +131,11 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                                 selectExpression,
                                 projectionAdder:
                                     (p, se) => se.AddToProjection(
-                                        new ColumnExpression(
-                                            _queryCompilationContext.GetColumnName(p),
-                                            p,
-                                            joinedTableExpression)) - readerOffset,
+                                        new AliasExpression(
+                                            new ColumnExpression(
+                                                _queryCompilationContext.GetColumnName(p),
+                                                p,
+                                                joinedTableExpression))) - readerOffset,
                                 querySource: null);
 
                     joinExpression.Predicate
@@ -199,7 +200,8 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
 
                     var innerJoinSelectExpression
                         = selectExpression.Clone(
-                            ((ColumnExpression)selectExpression.OrderBy.Last().Expression).TableAlias);
+                            ((AliasExpression)selectExpression.OrderBy.Last(o => 
+                                (o.Expression as AliasExpression)?.ColumnExpression != null).Expression).ColumnExpression.TableAlias);
 
                     innerJoinSelectExpression.IsDistinct = true;
                     innerJoinSelectExpression.ClearProjection();
@@ -332,11 +334,11 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
 
             var matchingColumnExpression
                 = projections
-                    .OfType<ColumnExpression>()
-                    .Last(p => p.Property == property);
+                    .OfType<AliasExpression>()
+                    .Last(p => p.ColumnExpression?.Property == property);
 
             return new ColumnExpression(
-                matchingColumnExpression.Alias ?? matchingColumnExpression.Name,
+                matchingColumnExpression.Alias ?? matchingColumnExpression.ColumnExpression.Name,
                 property,
                 tableExpression);
         }
